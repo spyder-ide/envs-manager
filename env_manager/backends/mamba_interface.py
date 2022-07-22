@@ -7,7 +7,7 @@ import os.path as osp
 from env_manager.api import EnvManagerInstance
 
 class MambaInterface(EnvManagerInstance):
-    ID = 'MAMBA'
+    ID = 'mamba'
 
     def validate(self):
         try:

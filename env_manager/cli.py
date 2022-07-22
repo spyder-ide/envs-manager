@@ -16,8 +16,8 @@ def main(args=None):
                                                 'environment in a target '
                                                 'directory.')
     parser.add_argument('-b', '--backend',
-                        default=os.environ.get('ENV_BACKEND', 'MAMBA'),
-                        choices=['venv', 'mamba', 'micromamba],
+                        default=os.environ.get('ENV_BACKEND', 'mamba'),
+                        choices=list(Manager.BACKENDS.keys()),
                         help='The implementation to '
                              'create/manage a virtual '
                              'Python environment in the given '
@@ -76,8 +76,8 @@ def main(args=None):
                       env_directory=options.env_directory)
     
     if options.command == 'create':
-        manager.create(packages=options.packages or ['python'],
-                       channels=options.channels)
+        manager.create_environment(packages=options.packages or ['python'],
+                                   channels=options.channels)
     elif options.command == 'install':
         manager.install(packages=options.packages)
     elif options.command == 'uninstall':

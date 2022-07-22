@@ -5,7 +5,7 @@
 from env_manager.api import EnvManagerInstance
 
 class MicromambaInterface(EnvManagerInstance):
-    ID = 'MICROMAMBA'
+    ID = 'micromamba'
 
     def validate(self):
         pass

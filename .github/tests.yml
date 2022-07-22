@@ -1,9 +1,7 @@
 # Run the project's test suite
 name: Tests
 
-on:
-  push
-  pull_request
+on: [pull_request, pull]
 
 jobs:
   test:

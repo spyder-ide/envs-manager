@@ -28,6 +28,6 @@ def test_cli_create(tmp_path):
     env_directory = envs_directory / "test_create"
     env_directory.mkdir(parents=True)
     create_output = subprocess.check_output(
-            ['env-manager', '-b=MAMBA', f'-ed={env_directory}', 'create']
+            ['env-manager', '-b=mamba', f'-ed={env_directory}', 'create']
         )
     assert 'Transaction finished' in str(create_output)

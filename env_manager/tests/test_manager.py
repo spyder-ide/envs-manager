@@ -9,8 +9,8 @@ import pytest
 from env_manager.manager import Manager
 
 
-# TODO: Add VENV and MICROMAMBA backends
-BACKENDS = [('MAMBA', 'mamba')]
+# TODO: Add 'venv' and 'micromamba' backends
+BACKENDS = [('mamba', 'mamba')]
 
 
 def wait_until(condition, interval=0.1, timeout=1):
@@ -28,7 +28,7 @@ def test_manager_backends(backend, package, tmp_path):
     manager = Manager(backend=backend, env_directory=env_directory)
 
     # Create an environment with Python in it
-    manager.create(packages=['python'])
+    manager.create_environment(packages=['python'])
     initial_list = manager.list()
     assert 'python' in ' '.join(initial_list)
 

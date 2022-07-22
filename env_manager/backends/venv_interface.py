@@ -5,7 +5,7 @@
 from env_manager.api import EnvManagerInstance
 
 class VEnvInterface(EnvManagerInstance):
-    ID = 'VENV'
+    ID = 'venv'
 
     def validate(self):
         pass

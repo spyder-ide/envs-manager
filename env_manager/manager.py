@@ -8,6 +8,9 @@ from env_manager.backends.micromamba_interface import MicromambaInterface
 
 
 class Manager:
+    """
+    Class to handle different Python environment and packages managers implementations.
+    """
     BACKENDS = {
         MambaInterface.ID: MambaInterface,
         VEnvInterface.ID: VEnvInterface,
