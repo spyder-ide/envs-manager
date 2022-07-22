@@ -17,6 +17,7 @@
 
 ## Installation
 
+*Note:* This package is not available yet for installation but it will be in the coming months.
 
 ### PyPI
 
