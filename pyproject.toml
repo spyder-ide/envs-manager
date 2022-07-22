@@ -26,9 +26,9 @@ dependencies = []
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://github.com/unknown/env-manager#readme"
-Issues = "https://github.com/unknown/env-manager/issues"
-Source = "https://github.com/unknown/env-manager"
+Documentation = "https://github.com/spyder-ide/env-manager#readme"
+Issues = "https://github.com/spyder-ide/env-manager/issues"
+Source = "https://github.com/spyder-ide/env-manager"
 
 [project.scripts]
 env-manager = "env_manager.cli:main"
