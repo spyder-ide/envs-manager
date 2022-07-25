@@ -2,8 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
+
 class EnvManagerInstance:
-    ID = ''
+    ID = ""
 
     def __init__(self, executable_path=None):
         self.executable = executable_path
@@ -20,7 +21,7 @@ class EnvManagerInstance:
 
     def activate_environment(self):
         raise NotImplementedError()
-    
+
     def deactivate_environment(self):
         raise NotImplementedError()
 
@@ -35,8 +36,6 @@ class EnvManagerInstance:
 
     def uninstall_packages(self, environment_path, packages):
         raise NotImplementedError()
-    
+
     def list_packages(self, environment_path):
         raise NotImplementedError()
-
-

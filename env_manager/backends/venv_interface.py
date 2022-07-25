@@ -4,8 +4,9 @@
 
 from env_manager.api import EnvManagerInstance
 
+
 class VEnvInterface(EnvManagerInstance):
-    ID = 'venv'
+    ID = "venv"
 
     def validate(self):
         pass
@@ -18,7 +19,7 @@ class VEnvInterface(EnvManagerInstance):
 
     def activate_environment(self):
         raise NotImplementedError()
-    
+
     def deactivate_environment(self):
         raise NotImplementedError()
 
@@ -33,7 +34,6 @@ class VEnvInterface(EnvManagerInstance):
 
     def uninstall_packages(self, environment_path, packages):
         raise NotImplementedError()
-    
+
     def list_packages(self, environment_path):
         raise NotImplementedError()
-

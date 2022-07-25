@@ -11,10 +11,11 @@ class Manager:
     """
     Class to handle different Python environment and packages managers implementations.
     """
+
     BACKENDS = {
         MambaInterface.ID: MambaInterface,
         VEnvInterface.ID: VEnvInterface,
-        MicromambaInterface.ID: MicromambaInterface
+        MicromambaInterface.ID: MicromambaInterface,
     }
 
     def __init__(self, backend, env_directory, executable_path=None):
@@ -24,19 +25,22 @@ class Manager:
 
     def create_environment(self, packages=None, channels=None):
         if channels:
-            self.manager_instance.create_environment(self.env_directory, packages, channels)
+            self.manager_instance.create_environment(
+                self.env_directory, packages, channels
+            )
         else:
             self.manager_instance.create_environment(self.env_directory, packages)
-    
+
     def install(self, packages=None, channels=None):
         if channels:
-            self.manager_instance.install_packages(self.env_directory, packages, channels)
+            self.manager_instance.install_packages(
+                self.env_directory, packages, channels
+            )
         else:
             self.manager_instance.install_packages(self.env_directory, packages)
-    
+
     def uninstall(self, packages):
         self.manager_instance.uninstall_packages(self.env_directory, packages)
 
     def list(self):
         return self.manager_instance.list_packages(self.env_directory)
-

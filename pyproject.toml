@@ -69,3 +69,21 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.black]
+py36 = true
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.github
+  | \.hg
+  | \.mypy_cache
+  | \.pytest_cache
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
