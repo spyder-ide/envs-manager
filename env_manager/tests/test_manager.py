@@ -10,7 +10,7 @@ from env_manager.manager import Manager
 
 
 # TODO: Add 'venv' and 'micromamba' backends
-BACKENDS = [("mamba", "mamba")]
+BACKENDS = [("mamba", "python", "mamba"), ("venv", "pip", "packaging")]
 
 
 def wait_until(condition, interval=0.1, timeout=1):
@@ -19,8 +19,8 @@ def wait_until(condition, interval=0.1, timeout=1):
         time.sleep(interval)
 
 
-@pytest.mark.parametrize("backend,package", BACKENDS)
-def test_manager_backends(backend, package, tmp_path):
+@pytest.mark.parametrize("backend,initial_package,installed_package", BACKENDS)
+def test_manager_backends(backend, initial_package, installed_package, tmp_path):
     envs_directory = tmp_path / "envs"
     env_directory = envs_directory / f"test_{backend}"
     env_directory.mkdir(parents=True)
@@ -30,14 +30,14 @@ def test_manager_backends(backend, package, tmp_path):
     # Create an environment with Python in it
     manager.create_environment(packages=["python"])
     initial_list = manager.list()
-    assert "python" in " ".join(initial_list)
+    assert initial_package in " ".join(initial_list)
 
     # Install a new package in the created environment
-    manager.install(packages=[package])
+    manager.install(packages=[installed_package])
 
     def package_installed():
         package_list = manager.list()
-        return package in " ".join(package_list)
+        return installed_package in " ".join(package_list)
 
     wait_until(package_installed)
 

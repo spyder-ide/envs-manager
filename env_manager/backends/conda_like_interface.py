@@ -5,8 +5,8 @@
 from env_manager.api import EnvManagerInstance
 
 
-class MicromambaInterface(EnvManagerInstance):
-    ID = "micromamba"
+class CondaLikeInterface(EnvManagerInstance):
+    ID = "conda-like"
 
     def validate(self):
         pass

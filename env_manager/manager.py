@@ -4,7 +4,7 @@
 
 from env_manager.backends.mamba_interface import MambaInterface
 from env_manager.backends.venv_interface import VEnvInterface
-from env_manager.backends.micromamba_interface import MicromambaInterface
+from env_manager.backends.conda_like_interface import CondaLikeInterface
 
 
 class Manager:
@@ -15,7 +15,7 @@ class Manager:
     BACKENDS = {
         MambaInterface.ID: MambaInterface,
         VEnvInterface.ID: VEnvInterface,
-        MicromambaInterface.ID: MicromambaInterface,
+        CondaLikeInterface.ID: CondaLikeInterface,
     }
 
     def __init__(self, backend, env_directory, executable_path=None):
