@@ -37,6 +37,9 @@ test = [
   "pytest",
   "pytest-cov"
 ]
+pre-commit = [
+  "pre-commit"
+]
 
 [tool.hatch.version]
 path = "env_manager/__about__.py"

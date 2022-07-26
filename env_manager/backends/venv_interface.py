@@ -53,10 +53,10 @@ class VEnvInterface(EnvManagerInstance):
         print(result)
         return result.split("\r\n")
 
-    def uninstall_packages(self, environment_path, packages):
+    def uninstall_packages(self, environment_path, packages, force=False):
         executable_path = osp.join(environment_path, "Scripts", "python.exe")
         result = subprocess.check_output(
-            [executable_path, "-m", "pip", "uninstall"] + packages
+            [executable_path, "-m", "pip", "uninstall", "-y"] + packages
         ).decode("utf-8")
         print(result)
         return result.split("\r\n")

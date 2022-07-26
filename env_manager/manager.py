@@ -39,8 +39,10 @@ class Manager:
         else:
             self.manager_instance.install_packages(self.env_directory, packages)
 
-    def uninstall(self, packages):
-        self.manager_instance.uninstall_packages(self.env_directory, packages)
+    def uninstall(self, packages, force=False):
+        self.manager_instance.uninstall_packages(
+            self.env_directory, packages, force=force
+        )
 
     def list(self):
         return self.manager_instance.list_packages(self.env_directory)

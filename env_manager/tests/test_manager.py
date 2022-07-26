@@ -41,9 +41,11 @@ def test_manager_backends(backend, initial_package, installed_package, tmp_path)
 
     wait_until(package_installed)
 
-    # TODO: Uninstall package from the created environment
-    # manager.uninstall(packages=[package])
-    # def package_uninstalled():
-    #     package_list = manager.list()
-    #     return package not in ' '.join(package_list)
-    # wait_until(package_uninstalled)
+    if backend == "venv":
+        manager.uninstall(packages=[installed_package], force=True)
+
+        def package_uninstalled():
+            package_list = manager.list()
+            return installed_package not in " ".join(package_list)
+
+        wait_until(package_uninstalled)

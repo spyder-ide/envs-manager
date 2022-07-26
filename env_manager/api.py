@@ -34,7 +34,7 @@ class EnvManagerInstance:
     def install_packages(self, environment_path, packages, channels=None):
         raise NotImplementedError()
 
-    def uninstall_packages(self, environment_path, packages):
+    def uninstall_packages(self, environment_path, packages, force=False):
         raise NotImplementedError()
 
     def list_packages(self, environment_path):

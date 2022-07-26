@@ -49,7 +49,7 @@ class MambaInterface(EnvManagerInstance):
         environment_name = osp.basename(environment_path)
         install(environment_name, packages, channels, base_prefix=base_prefix)
 
-    def uninstall_packages(self, environment_path, packages):
+    def uninstall_packages(self, environment_path, packages, force=False):
         from mamba.api import MambaSolver
 
         base_prefix = osp.dirname(osp.dirname(environment_path))
