@@ -10,6 +10,11 @@ import pytest
 SUBCOMMANDS = [
     "",
     "create",
+    "delete",
+    "activate",
+    "deactivate",
+    "export",
+    "import",
     "install",
     "uninstall",
     "list",

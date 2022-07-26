@@ -31,22 +31,56 @@ def main(args=None):
         default=os.environ.get(
             "ENV_DIR", osp.join(os.getcwd(), "envs", str(uuid.uuid4()))
         ),
-        help="A directory where the virtual environment "
-        "is or will be located following the structure "
-        "<base path>/envs/<env name>.",
+        help="A directory where the virtual environment is or will be located following the structure <base path>/envs/<env name>.",
     )
 
     main_subparser = parser.add_subparsers(title="commands", dest="command")
+
     # Create env
     parser_create = main_subparser.add_parser(
         "create",
-        help="Create a virtual Python " "environment in the target " "directory.",
+        help="Create a virtual Python environment in the target directory.",
     )
     parser_create.add_argument(
-        "--packages", nargs="+", help="List of packages to install"
+        "--packages", nargs="+", help="List of packages to install."
     )
     parser_create.add_argument(
-        "--channels", nargs="+", help="List of channels from where to install"
+        "--channels", nargs="+", help="List of channels from where to install."
+    )
+
+    # Delete env
+    parser_delete = main_subparser.add_parser(
+        "delete", help="Delete a virtual Python environment in the target directory."
+    )
+
+    # Activate env
+    parser_activate = main_subparser.add_parser(
+        "activate",
+        help="Activate the virtual Python environment in the target directory.",
+    )
+
+    # Deactivate env
+    parser_deactivate = main_subparser.add_parser(
+        "deactivate",
+        help="Deactivate the virtual Python environment in the target directory.",
+    )
+
+    # Export env
+    parser_export = main_subparser.add_parser(
+        "export",
+        help="Export a virtual Python environment in the target directory to a file.",
+    )
+    parser_export.add_argument(
+        "export_file_path", help="File path to export the environment."
+    )
+
+    # Export env
+    parser_import = main_subparser.add_parser(
+        "import",
+        help="Export a virtual Python environment in the target directory to a file.",
+    )
+    parser_import.add_argument(
+        "import_file_path", help="File path from where to import the environment."
     )
 
     # Install packages
@@ -58,10 +92,10 @@ def main(args=None):
         "target directory.",
     )
     parser_install.add_argument(
-        "packages", nargs="+", help="List of packages to install"
+        "packages", nargs="+", help="List of packages to install."
     )
     parser_install.add_argument(
-        "--channels", nargs="+", help="List of channels from where to install"
+        "--channels", nargs="+", help="List of channels from where to install."
     )
 
     # Uninstall packages
@@ -73,7 +107,7 @@ def main(args=None):
         "target directory.",
     )
     parser_uninstall.add_argument(
-        "packages", nargs="+", help="List of packages to uninstall"
+        "packages", nargs="+", help="List of packages to uninstall."
     )
 
     # List packages
@@ -93,6 +127,16 @@ def main(args=None):
         manager.create_environment(
             packages=options.packages or ["python"], channels=options.channels
         )
+    elif options.command == "delete":
+        manager.delete_environment()
+    elif options.command == "activate":
+        manager.activate()
+    elif options.command == "deactivate":
+        manager.deactivate()
+    elif options.command == "export":
+        manager.export_environment(options.export_file_path)
+    elif options.command == "import":
+        manager.import_environment(options.import_file_path)
     elif options.command == "install":
         manager.install(packages=options.packages)
     elif options.command == "uninstall":

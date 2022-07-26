@@ -31,6 +31,25 @@ class Manager:
         else:
             self.manager_instance.create_environment(self.env_directory, packages)
 
+    def delete_environment(self):
+        self.manager_instance.delete_environment(self.env_directory)
+
+    def activate(self):
+        self.manager_instance.activate_environment(self.env_directory)
+
+    def deactivate(self):
+        self.manager_instance.deactivate_environment(self.env_directory)
+
+    def export_environment(self, export_file_path):
+        self.manager_instance.deactivate_environment(
+            self.env_directory, export_file_path
+        )
+
+    def import_environment(self, import_file_path):
+        self.manager_instance.deactivate_environment(
+            self.env_directory, import_file_path
+        )
+
     def install(self, packages=None, channels=None):
         if channels:
             self.manager_instance.install_packages(

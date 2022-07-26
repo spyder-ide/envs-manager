@@ -36,10 +36,10 @@ class MambaInterface(EnvManagerInstance):
     def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, environment_path):
+    def export_environment(self, environment_path, export_file_path):
         raise NotImplementedError()
 
-    def import_environment(self, environment_path):
+    def import_environment(self, environment_path, import_file_path):
         raise NotImplementedError()
 
     def install_packages(self, environment_path, packages, channels=("conda-forge",)):

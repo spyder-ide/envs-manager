@@ -33,16 +33,16 @@ class VEnvInterface(EnvManagerInstance):
     def delete_environment(self, environment_path):
         shutil.rmtree(environment_path)
 
-    def activate_environment(self):
+    def activate_environment(self, environment_path):
         raise NotImplementedError()
 
-    def deactivate_environment(self):
+    def deactivate_environment(self, environment_path):
         raise NotImplementedError()
 
-    def export_environment(self, environment_path):
+    def export_environment(self, environment_path, export_file_path):
         raise NotImplementedError()
 
-    def import_environment(self, environment_path):
+    def import_environment(self, environment_path, import_file_path):
         raise NotImplementedError()
 
     def install_packages(self, environment_path, packages, channels=None):
