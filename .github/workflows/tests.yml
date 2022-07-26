@@ -4,8 +4,8 @@ name: Tests
 on: [pull_request, push]
 
 jobs:
-  test:
-    name: Test ${{ matrix.os }} Python ${{ matrix.python-version }} conda=${{ matrix.use-conda }}
+  tests:
+    name: Test ${{ matrix.os }} Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
     env:
