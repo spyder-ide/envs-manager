@@ -45,7 +45,7 @@ class VEnvInterface(EnvManagerInstance):
     def import_environment(self, environment_path, import_file_path):
         raise NotImplementedError()
 
-    def install_packages(self, environment_path, packages, channels=None):
+    def install_packages(self, environment_path, packages, channels=None, force=False):
         executable_path = osp.join(environment_path, "Scripts", "python.exe")
         result = subprocess.check_output(
             [executable_path, "-m", "pip", "install"] + packages

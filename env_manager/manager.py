@@ -50,13 +50,15 @@ class Manager:
             self.env_directory, import_file_path
         )
 
-    def install(self, packages=None, channels=None):
+    def install(self, packages=None, channels=None, force=False):
         if channels:
             self.manager_instance.install_packages(
-                self.env_directory, packages, channels
+                self.env_directory, packages=packages, channels=channels, force=force
             )
         else:
-            self.manager_instance.install_packages(self.env_directory, packages)
+            self.manager_instance.install_packages(
+                self.env_directory, packages, force=force
+            )
 
     def uninstall(self, packages, force=False):
         self.manager_instance.uninstall_packages(

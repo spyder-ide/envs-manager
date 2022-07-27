@@ -121,7 +121,12 @@ def main(args=None):
 
     options = parser.parse_args(args)
     print(options)
-    manager = Manager(backend=options.backend, env_directory=options.env_directory)
+    executable_path = os.environ.get("ENV_BACKEND_EXECUTABLE")
+    manager = Manager(
+        backend=options.backend,
+        env_directory=options.env_directory,
+        executable_path=executable_path,
+    )
 
     if options.command == "create":
         manager.create_environment(

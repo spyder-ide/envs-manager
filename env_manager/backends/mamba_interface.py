@@ -42,7 +42,9 @@ class MambaInterface(EnvManagerInstance):
     def import_environment(self, environment_path, import_file_path):
         raise NotImplementedError()
 
-    def install_packages(self, environment_path, packages, channels=("conda-forge",)):
+    def install_packages(
+        self, environment_path, packages, channels=("conda-forge",), force=False
+    ):
         from mamba.api import install
 
         base_prefix = osp.dirname(osp.dirname(environment_path))
