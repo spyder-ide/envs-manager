@@ -4,8 +4,8 @@
 
 import argparse
 import os
-import os.path as osp
 import uuid
+from pathlib import Path
 
 from env_manager.manager import Manager
 
@@ -28,9 +28,7 @@ def main(args=None):
     parser.add_argument(
         "-ed",
         "--env_directory",
-        default=os.environ.get(
-            "ENV_DIR", osp.join(os.getcwd(), "envs", str(uuid.uuid4()))
-        ),
+        default=os.environ.get("ENV_DIR", Path.cwd() / "envs" / str(uuid.uuid4())),
         help="A directory where the virtual environment is or will be located following the structure <base path>/envs/<env name>.",
     )
 

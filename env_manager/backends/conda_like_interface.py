@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os.path as osp
 import subprocess
 
 from env_manager.api import EnvManagerInstance

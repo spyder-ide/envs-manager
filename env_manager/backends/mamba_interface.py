@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os.path as osp
+from pathlib import Path
 
 from env_manager.api import EnvManagerInstance
 
@@ -23,8 +23,8 @@ class MambaInterface(EnvManagerInstance):
     ):
         from mamba.api import create
 
-        base_prefix = osp.dirname(osp.dirname(environment_path))
-        environment_name = osp.basename(environment_path)
+        base_prefix = Path(environment_path).parent.parent
+        environment_name = Path(environment_path).name
         create(environment_name, packages, channels, base_prefix=base_prefix)
 
     def delete_environment(self, environment_path):
@@ -47,15 +47,15 @@ class MambaInterface(EnvManagerInstance):
     ):
         from mamba.api import install
 
-        base_prefix = osp.dirname(osp.dirname(environment_path))
-        environment_name = osp.basename(environment_path)
+        base_prefix = Path(environment_path).parent.parent
+        environment_name = Path(environment_path).name
         install(environment_name, packages, channels, base_prefix=base_prefix)
 
     def uninstall_packages(self, environment_path, packages, force=False):
         from mamba.api import MambaSolver
 
-        base_prefix = osp.dirname(osp.dirname(environment_path))
-        environment_name = osp.basename(environment_path)
+        base_prefix = Path(environment_path).parent.parent
+        environment_name = Path(environment_path).name
         # TODO: Check https://github.com/mamba-org/mamba/blob/41d99c81d9652f73e38227d1b35cb3ff9b09b206/mamba/mamba/mamba.py#L130
         # and https://github.com/mamba-org/mamba/blob/da44aadfaf88dfa3ce21656d671682626379cea6/mamba/mamba/api.py#L116
 

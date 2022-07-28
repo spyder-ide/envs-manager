@@ -2,9 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os.path as osp
 import shutil
 import subprocess
+from pathlib import Path
 
 from env_manager.api import EnvManagerInstance
 
@@ -46,7 +46,7 @@ class VEnvInterface(EnvManagerInstance):
         raise NotImplementedError()
 
     def install_packages(self, environment_path, packages, channels=None, force=False):
-        executable_path = osp.join(environment_path, "Scripts", "python.exe")
+        executable_path = Path(environment_path) / "Scripts" / "python.exe"
         result = subprocess.check_output(
             [executable_path, "-m", "pip", "install"] + packages
         ).decode("utf-8")
@@ -54,7 +54,7 @@ class VEnvInterface(EnvManagerInstance):
         return result.split("\r\n")
 
     def uninstall_packages(self, environment_path, packages, force=False):
-        executable_path = osp.join(environment_path, "Scripts", "python.exe")
+        executable_path = Path(environment_path) / "Scripts" / "python.exe"
         result = subprocess.check_output(
             [executable_path, "-m", "pip", "uninstall", "-y"] + packages
         ).decode("utf-8")
@@ -62,7 +62,7 @@ class VEnvInterface(EnvManagerInstance):
         return result.split("\r\n")
 
     def list_packages(self, environment_path):
-        executable_path = osp.join(environment_path, "Scripts", "python.exe")
+        executable_path = Path(environment_path) / "Scripts" / "python.exe"
         result = subprocess.check_output([executable_path, "-m", "pip", "list"]).decode(
             "utf-8"
         )
