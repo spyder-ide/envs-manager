@@ -72,7 +72,7 @@ def main(args=None):
         "export_file_path", help="File path to export the environment."
     )
 
-    # Export env
+    # Import env
     parser_import = main_subparser.add_parser(
         "import",
         help="Export a virtual Python environment in the target directory to a file.",
