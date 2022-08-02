@@ -75,7 +75,7 @@ def main(args=None):
     # Import env
     parser_import = main_subparser.add_parser(
         "import",
-        help="Export a virtual Python environment in the target directory to a file.",
+        help="Import a virtual Python environment in the target directory from a file.",
     )
     parser_import.add_argument(
         "import_file_path", help="File path from where to import the environment."
