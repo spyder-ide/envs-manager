@@ -66,7 +66,7 @@ pre-commit install
 pytest -vv
 ```
 
-* To check the CLI options:
+* To check the command line options you need to run:
 
 ```console
 env-manager --help
