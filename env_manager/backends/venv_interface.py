@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -46,7 +47,11 @@ class VEnvInterface(EnvManagerInstance):
         raise NotImplementedError()
 
     def install_packages(self, environment_path, packages, channels=None, force=False):
-        executable_path = Path(environment_path) / "Scripts" / "python.exe"
+        if os.name == "nt":
+            executable_path = Path(environment_path) / "Scripts" / "python.exe"
+        else:
+            executable_path = Path(environment_path) / "bin" / "python"
+
         result = subprocess.check_output(
             [executable_path, "-m", "pip", "install"] + packages
         ).decode("utf-8")
@@ -54,7 +59,11 @@ class VEnvInterface(EnvManagerInstance):
         return result.split("\r\n")
 
     def uninstall_packages(self, environment_path, packages, force=False):
-        executable_path = Path(environment_path) / "Scripts" / "python.exe"
+        if os.name == "nt":
+            executable_path = Path(environment_path) / "Scripts" / "python.exe"
+        else:
+            executable_path = Path(environment_path) / "bin" / "python"
+
         result = subprocess.check_output(
             [executable_path, "-m", "pip", "uninstall", "-y"] + packages
         ).decode("utf-8")
@@ -62,7 +71,11 @@ class VEnvInterface(EnvManagerInstance):
         return result.split("\r\n")
 
     def list_packages(self, environment_path):
-        executable_path = Path(environment_path) / "Scripts" / "python.exe"
+        if os.name == "nt":
+            executable_path = Path(environment_path) / "Scripts" / "python.exe"
+        else:
+            executable_path = Path(environment_path) / "bin" / "python"
+
         result = subprocess.check_output([executable_path, "-m", "pip", "list"]).decode(
             "utf-8"
         )

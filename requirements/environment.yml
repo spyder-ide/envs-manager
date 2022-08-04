@@ -1,0 +1,15 @@
+channels:
+  - conda-forge
+dependencies:
+  # Build dependencies
+  - hatch
+
+  # Backends
+  - mamba
+
+  # For autoformat with Black
+  - pre-commit
+
+  # For testing
+  - pytest
+  - pytest-cov
