@@ -10,9 +10,7 @@ import pytest
 from env_manager.manager import Manager
 
 
-# TODO: Add 'venv' and 'micromamba' backends
 BACKENDS = [
-    ("mamba", "python", "mamba", None),
     ("venv", "pip", "packaging", None),
     ("conda-like", "python", "packaging", os.environ.get("ENV_BACKEND_EXECUTABLE")),
 ]
@@ -55,12 +53,11 @@ def test_manager_backends(
 
     wait_until(package_installed)
 
-    if backend != "mamba":
-        # Uninstall the new package
-        manager.uninstall(packages=[installed_package], force=True)
+    # Uninstall the new package
+    manager.uninstall(packages=[installed_package], force=True)
 
-        def package_uninstalled():
-            package_list = manager.list()
-            return installed_package not in " ".join(package_list)
+    def package_uninstalled():
+        package_list = manager.list()
+        return installed_package not in " ".join(package_list)
 
-        wait_until(package_uninstalled)
+    wait_until(package_uninstalled)

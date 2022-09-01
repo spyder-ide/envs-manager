@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-from env_manager.backends.mamba_interface import MambaInterface
 from env_manager.backends.venv_interface import VEnvInterface
 from env_manager.backends.conda_like_interface import CondaLikeInterface
 
@@ -13,7 +12,6 @@ class Manager:
     """
 
     BACKENDS = {
-        MambaInterface.ID: MambaInterface,
         VEnvInterface.ID: VEnvInterface,
         CondaLikeInterface.ID: CondaLikeInterface,
     }

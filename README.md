@@ -62,6 +62,8 @@ pre-commit install
 
 * To run the test:
 
+You will need to setup the `ENV_BACKEND_EXECUTABLE` environmental variable in order to use a `conda-like` manager. The environmental variable should point to the executable. For example if you have micromamba downloaded on Windows you should set `ENV_BACKEND_EXECUTABLE=<path to micromama executable>/micromamba.exe`. After that you should be able to run the tests with:
+
 ```console
 pytest -vv
 ```
