@@ -51,24 +51,31 @@ class VEnvInterface(EnvManagerInstance):
             executable_path = Path(environment_path) / "Scripts" / "python.exe"
         else:
             executable_path = Path(environment_path) / "bin" / "python"
-
-        result = subprocess.check_output(
-            [executable_path, "-m", "pip", "install"] + packages
-        ).decode("utf-8")
-        print(result)
-        return result.split("\r\n")
+        try:
+            command = [str(executable_path), "-m", "pip", "install"] + packages
+            result = subprocess.run(
+                " ".join(command), capture_output=True, check=True, text=True
+            )
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def uninstall_packages(self, environment_path, packages, force=False):
         if os.name == "nt":
             executable_path = Path(environment_path) / "Scripts" / "python.exe"
         else:
             executable_path = Path(environment_path) / "bin" / "python"
-
-        result = subprocess.check_output(
-            [executable_path, "-m", "pip", "uninstall", "-y"] + packages
-        ).decode("utf-8")
-        print(result)
-        return result.split("\r\n")
+        try:
+            command = [str(executable_path), "-m", "pip", "uninstall"]
+            if force:
+                command += ["-y"]
+            command += packages
+            result = subprocess.run(
+                " ".join(command), capture_output=True, check=True, text=True
+            )
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def list_packages(self, environment_path):
         if os.name == "nt":
