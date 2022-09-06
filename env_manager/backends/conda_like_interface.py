@@ -60,9 +60,7 @@ class CondaLikeInterface(EnvManagerInstance):
             channels = ["-c"] + channels
             command += channels
         try:
-            result = subprocess.run(
-                " ".join(command), capture_output=True, check=True, text=True
-            )
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -77,9 +75,7 @@ class CondaLikeInterface(EnvManagerInstance):
         if force:
             command + ["-y"]
         try:
-            result = subprocess.run(
-                " ".join(command), capture_output=True, check=True, text=True
-            )
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")

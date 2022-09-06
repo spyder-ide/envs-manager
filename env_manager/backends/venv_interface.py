@@ -53,9 +53,7 @@ class VEnvInterface(EnvManagerInstance):
             executable_path = Path(environment_path) / "bin" / "python"
         try:
             command = [str(executable_path), "-m", "pip", "install"] + packages
-            result = subprocess.run(
-                " ".join(command), capture_output=True, check=True, text=True
-            )
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -70,9 +68,7 @@ class VEnvInterface(EnvManagerInstance):
             if force:
                 command += ["-y"]
             command += packages
-            result = subprocess.run(
-                " ".join(command), capture_output=True, check=True, text=True
-            )
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
