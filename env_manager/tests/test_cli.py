@@ -44,7 +44,9 @@ def test_cli_create(tmp_path, backend):
     envs_directory.mkdir(parents=True)
     env_directory = envs_directory / "test_create"
     create_output = subprocess.check_output(
-        ["env-manager", f"-b={backend_value}", f"-ed={env_directory}", "create"],
+        " ".join(
+            ["env-manager", f"-b={backend_value}", f"-ed={env_directory}", "create"]
+        ),
         shell=True,
     )
     assert result in str(create_output)
