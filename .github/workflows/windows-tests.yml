@@ -1,19 +1,18 @@
 # Run the project's test suite
-name: Tests
+name: Windows tests
 
 on: [pull_request, push]
 
 jobs:
   tests:
-    name: Test ${{ matrix.os }} Python ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: windows-latest
     timeout-minutes: 10
     env:
       PYTHON_VERSION: ${{ matrix.python-version }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
         python-version: ['3.7', '3.10']
     steps:
       - name: Checkout branch
@@ -29,8 +28,8 @@ jobs:
       - name: Install Micromamba and setup as executable backend
         shell: bash -l {0}
         run: |
-          wget -qO- https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
-          echo "ENV_BACKEND_EXECUTABLE=${{ github.workspace }}/bin/micromamba" >> $GITHUB_ENV
+          curl -Ls https://micro.mamba.pm/api/micromamba/win-64/latest | tar -xvj Library/bin/micromamba.exe
+          echo "ENV_BACKEND_EXECUTABLE=${{ github.workspace }}\Library\bin\micromamba.exe" >> $GITHUB_ENV
       - name: Install env-manager
         shell: bash -l {0}
         run: |
