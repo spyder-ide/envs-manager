@@ -13,9 +13,6 @@ class EnvManagerInstance:
     def validate(self):
         pass
 
-    def parse_packages(self, packages):
-        pass
-
     def create_environment(self, environment_path, packages=None, channels=None):
         raise NotImplementedError()
 

@@ -28,8 +28,10 @@ jobs:
       - name: Install Micromamba and setup as executable backend
         shell: bash -l {0}
         run: |
-          curl -Ls https://micro.mamba.pm/api/micromamba/win-64/latest | tar -xvj Library/bin/micromamba.exe
-          echo "ENV_BACKEND_EXECUTABLE=${{ github.workspace }}\Library\bin\micromamba.exe" >> $GITHUB_ENV
+          mkdir micromamba
+          curl -Ls https://micro.mamba.pm/api/micromamba/win-64/latest | tar -xvj -C micromamba
+          echo "ENV_BACKEND_EXECUTABLE=${{ github.workspace }}\micromamba\Library\bin\micromamba.exe" >> $GITHUB_ENV
+          echo "MAMBA_ROOT_PREFIX=${{ github.workspace }}\micromamba" >> $GITHUB_ENV
       - name: Install env-manager
         shell: bash -l {0}
         run: |

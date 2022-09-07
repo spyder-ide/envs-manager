@@ -58,7 +58,7 @@ def test_manager_backends(
         env_directory.mkdir(parents=True)
 
     manager = Manager(
-        backend=backend, env_directory=env_directory, executable_path=executable
+        backend=backend, env_directory=str(env_directory), executable_path=executable
     )
 
     # Create an environment with Python in it

@@ -79,8 +79,8 @@ class VEnvInterface(EnvManagerInstance):
         else:
             executable_path = Path(environment_path) / "bin" / "python"
 
-        result = subprocess.check_output([executable_path, "-m", "pip", "list"]).decode(
-            "utf-8"
-        )
+        result = subprocess.check_output(
+            [str(executable_path), "-m", "pip", "list"]
+        ).decode("utf-8")
         print(result)
         return result.split("\r\n")
