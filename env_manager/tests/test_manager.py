@@ -16,7 +16,10 @@ BACKENDS = [
         "pip",
         ["packaging"],
         ["packagingg"],
-        "Could not find a version that satisfies the requirement packagingg",
+        (
+            "Could not find a version that satisfies the requirement packagingg",
+            "WARNING: Skipping packagingg as it is not installed",
+        ),
         None,
     ),
     (
@@ -24,7 +27,7 @@ BACKENDS = [
         "python",
         ["packaging"],
         ["packagingg"],
-        "libmamba Could not solve for environment specs",
+        ("libmamba Could not solve for environment specs", "Nothing to do"),
         os.environ.get("ENV_BACKEND_EXECUTABLE"),
     ),
 ]
@@ -38,7 +41,7 @@ def wait_until(condition, interval=0.1, timeout=1):
 
 @pytest.mark.parametrize(
     "backend,initial_package,installed_packages,errored_packages,"
-    "error_message,executable",
+    "messages,executable",
     BACKENDS,
 )
 def test_manager_backends(
@@ -46,7 +49,7 @@ def test_manager_backends(
     initial_package,
     installed_packages,
     errored_packages,
-    error_message,
+    messages,
     executable,
     tmp_path,
 ):
@@ -89,11 +92,16 @@ def test_manager_backends(
     wait_until(packages_uninstalled)
 
     # Try to install unexisting package
-    error_result, message = manager.install(packages=errored_packages, force=True)
+    install_error_message, uninstall_warning_message = messages
+    error_result, error_message = manager.install(packages=errored_packages, force=True)
     assert not error_result
-    assert error_message in message
+    assert install_error_message in error_message
 
     # Try to uninstall unexisting package
-    # error_result, message = manager.uninstall(packages=errored_packages, force=True)
-    # assert not error_result
-    # assert error_message in message
+    warning_result, subprocess_result = manager.uninstall(
+        packages=errored_packages, force=True
+    )
+    assert warning_result
+    assert (
+        uninstall_warning_message in subprocess_result.stdout + subprocess_result.stderr
+    )

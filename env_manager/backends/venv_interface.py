@@ -13,6 +13,13 @@ from env_manager.api import EnvManagerInstance
 class VEnvInterface(EnvManagerInstance):
     ID = "venv"
 
+    def _run_command(self, command):
+        run_env = os.environ.copy()
+        run_env["PIP_REQUIRE_VIRTUALENV"] = "true"
+        return subprocess.run(
+            command, capture_output=True, check=True, text=True, env=run_env
+        )
+
     def validate(self):
         try:
             import venv
@@ -53,7 +60,7 @@ class VEnvInterface(EnvManagerInstance):
             executable_path = Path(environment_path) / "bin" / "python"
         try:
             command = [str(executable_path), "-m", "pip", "install"] + packages
-            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            result = self._run_command(command)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -68,7 +75,7 @@ class VEnvInterface(EnvManagerInstance):
             if force:
                 command += ["-y"]
             command += packages
-            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            result = self._run_command(command)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
