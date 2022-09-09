@@ -13,6 +13,13 @@ from env_manager.api import EnvManagerInstance
 class VEnvInterface(EnvManagerInstance):
     ID = "venv"
 
+    def _run_command(self, command):
+        run_env = os.environ.copy()
+        run_env["PIP_REQUIRE_VIRTUALENV"] = "true"
+        return subprocess.run(
+            command, capture_output=True, check=True, text=True, env=run_env
+        )
+
     def validate(self):
         try:
             import venv
@@ -51,24 +58,27 @@ class VEnvInterface(EnvManagerInstance):
             executable_path = Path(environment_path) / "Scripts" / "python.exe"
         else:
             executable_path = Path(environment_path) / "bin" / "python"
-
-        result = subprocess.check_output(
-            [executable_path, "-m", "pip", "install"] + packages
-        ).decode("utf-8")
-        print(result)
-        return result.split("\r\n")
+        try:
+            command = [str(executable_path), "-m", "pip", "install"] + packages
+            result = self._run_command(command)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def uninstall_packages(self, environment_path, packages, force=False):
         if os.name == "nt":
             executable_path = Path(environment_path) / "Scripts" / "python.exe"
         else:
             executable_path = Path(environment_path) / "bin" / "python"
-
-        result = subprocess.check_output(
-            [executable_path, "-m", "pip", "uninstall", "-y"] + packages
-        ).decode("utf-8")
-        print(result)
-        return result.split("\r\n")
+        try:
+            command = [str(executable_path), "-m", "pip", "uninstall"]
+            if force:
+                command += ["-y"]
+            command += packages
+            result = self._run_command(command)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def list_packages(self, environment_path):
         if os.name == "nt":
@@ -76,8 +86,8 @@ class VEnvInterface(EnvManagerInstance):
         else:
             executable_path = Path(environment_path) / "bin" / "python"
 
-        result = subprocess.check_output([executable_path, "-m", "pip", "list"]).decode(
-            "utf-8"
-        )
+        result = subprocess.check_output(
+            [str(executable_path), "-m", "pip", "list"]
+        ).decode("utf-8")
         print(result)
         return result.split("\r\n")

@@ -4,9 +4,6 @@ dependencies:
   # Build dependencies
   - hatch
 
-  # Backends
-  - mamba
-
   # For autoformat with Black
   - pre-commit
 

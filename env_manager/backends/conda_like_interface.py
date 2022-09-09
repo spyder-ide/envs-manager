@@ -48,20 +48,37 @@ class CondaLikeInterface(EnvManagerInstance):
     def install_packages(
         self, environment_path, packages, channels=["conda-forge"], force=False
     ):
-        command = [self.executable, "install", "-p", environment_path] + packages
+        command = [
+            str(self.executable),
+            "install",
+            "-p",
+            str(environment_path),
+        ] + packages
         if force:
-            command + ["-y"]
+            command += ["-y"]
         if channels:
             channels = ["-c"] + channels
-        result = subprocess.check_call(command)
-        print(result)
+            command += channels
+        try:
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def uninstall_packages(self, environment_path, packages, force=False):
-        command = [self.executable, "remove", "-p", environment_path] + packages
+        command = [
+            str(self.executable),
+            "remove",
+            "-p",
+            str(environment_path),
+        ] + packages
         if force:
             command + ["-y"]
-        result = subprocess.check_call(command)
-        print(result)
+        try:
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def list_packages(self, environment_path):
         result = subprocess.check_output(

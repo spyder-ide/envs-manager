@@ -18,7 +18,7 @@ def main(args=None):
     parser.add_argument(
         "-b",
         "--backend",
-        default=os.environ.get("ENV_BACKEND", "mamba"),
+        default=os.environ.get("ENV_BACKEND", "venv"),
         choices=list(Manager.BACKENDS.keys()),
         help="The implementation to "
         "create/manage a virtual "
