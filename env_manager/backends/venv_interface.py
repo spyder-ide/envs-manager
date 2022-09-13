@@ -48,10 +48,38 @@ class VEnvInterface(EnvManagerInstance):
         raise NotImplementedError()
 
     def export_environment(self, environment_path, export_file_path):
-        raise NotImplementedError()
+        if os.name == "nt":
+            executable_path = Path(environment_path) / "Scripts" / "python.exe"
+        else:
+            executable_path = Path(environment_path) / "bin" / "python"
+        try:
+            command = [str(executable_path), "-m", "pip", "list", "--format=freeze"]
+            result = self._run_command(command)
+            with open(export_file_path, "w") as exported_file:
+                exported_file.write(result.stdout)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def import_environment(self, environment_path, import_file_path):
-        raise NotImplementedError()
+        self.create_environment(environment_path)
+        if os.name == "nt":
+            executable_path = Path(environment_path) / "Scripts" / "python.exe"
+        else:
+            executable_path = Path(environment_path) / "bin" / "python"
+        try:
+            command = [
+                str(executable_path),
+                "-m",
+                "pip",
+                "install",
+                "-r",
+                import_file_path,
+            ]
+            result = self._run_command(command)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def install_packages(self, environment_path, packages, channels=None, force=False):
         if os.name == "nt":
