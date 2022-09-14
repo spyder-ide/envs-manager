@@ -24,14 +24,22 @@ class CondaLikeInterface(EnvManagerInstance):
             command += packages
         if channels:
             command += ["-c"] + channels
-        result = subprocess.check_call(command)
-        print(result)
+        try:
+            subprocess.check_output(command, stderr=subprocess.PIPE)
+            return (True, "")
+        except Exception as e:
+            error = e.stderr
+            return (False, error)
 
     def delete_environment(self, environment_path):
-        result = subprocess.check_call(
-            [self.executable, "remove", "-p", environment_path, "-y"]
-        )
-        print(result)
+        try:
+            subprocess.check_output(
+                [self.executable, "remove", "-p", environment_path, "-y"],
+                stderr=subprocess.PIPE,
+            )
+            return (True, "")
+        except Exception as e:
+            return (False, e.stderr)
 
     def activate_environment(self, environment_path):
         raise NotImplementedError()
