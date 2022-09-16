@@ -67,7 +67,13 @@ def test_manager_backends(
     # Create an environment with Python in it
     manager.create_environment(packages=["python"])
     initial_list = manager.list()
-    assert initial_package in " ".join(initial_list)
+
+    # List packages
+    assert initial_package in initial_list["packages"]
+    assert len(initial_list) == 2
+    assert len(initial_list["packages"]) > 0
+    assert len(initial_list["packages"][initial_package]) == 4
+    assert initial_list["environment"] == str(env_directory)
 
     # Install a new package in the created environment
     install_result = manager.install(packages=installed_packages, force=True)
@@ -76,7 +82,7 @@ def test_manager_backends(
     def package_installed():
         package_list = manager.list()
         for package in installed_packages:
-            return package in " ".join(package_list)
+            return package in package_list
 
     wait_until(package_installed)
 
@@ -87,7 +93,7 @@ def test_manager_backends(
     def packages_uninstalled():
         package_list = manager.list()
         for package in installed_packages:
-            return package not in " ".join(package_list)
+            return package not in package_list
 
     wait_until(packages_uninstalled)
 
