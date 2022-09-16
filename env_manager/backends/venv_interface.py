@@ -117,5 +117,20 @@ class VEnvInterface(EnvManagerInstance):
         result = subprocess.check_output(
             [str(executable_path), "-m", "pip", "list"]
         ).decode("utf-8")
+        result = result.split("\r\n")
         print(result)
-        return result.split("\r\n")
+        environment = environment_path
+        ret = {}
+        final_return = dict(environment=environment, packages=ret)
+        for i in range(2, len(result) - 1):
+            package_parts = result[i].split()
+            dicc = dict(
+                name=package_parts[0],
+                version=package_parts[1],
+                build=("None" if len(package_parts) <= 2 else package_parts[2]),
+                channel=("None" if len(package_parts) <= 3 else package_parts[3]),
+            )
+
+            ret[package_parts[0]] = dicc
+
+        return final_return

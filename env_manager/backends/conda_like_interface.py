@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+from distutils.command.build import build
 import subprocess
 
 from env_manager.api import EnvManagerInstance
@@ -25,11 +26,10 @@ class CondaLikeInterface(EnvManagerInstance):
         if channels:
             command += ["-c"] + channels
         try:
-            subprocess.check_output(command, stderr=subprocess.PIPE)
-            return (True, "")
-        except Exception as e:
-            error = e.stderr
-            return (False, error)
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            return (True, result)
+        except Exception as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def delete_environment(self, environment_path):
         try:
@@ -113,5 +113,20 @@ class CondaLikeInterface(EnvManagerInstance):
         result = subprocess.check_output(
             [self.executable, "list", "-p", environment_path]
         ).decode("utf-8")
-        print(result)
-        return result.split("\r\n")
+
+        result = result.split("\r\n")
+        environment = environment_path
+        ret = {}
+        final_return = dict(environment=environment, packages=ret)
+        for i in range(3, len(result) - 1):
+            package_parts = result[i].split()
+            dicc = dict(
+                name=package_parts[0],
+                version=package_parts[1],
+                build=("None" if len(package_parts) <= 2 else package_parts[2]),
+                channel=("None" if len(package_parts) <= 3 else package_parts[3]),
+            )
+
+            ret[package_parts[0]] = dicc
+
+        return final_return

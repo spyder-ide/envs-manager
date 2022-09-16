@@ -108,7 +108,13 @@ def test_manager_backends(
     # Create an environment with Python in it
     manager_instance.create_environment(packages=["python"])
     initial_list = manager_instance.list()
-    assert initial_package in " ".join(initial_list)
+
+    # List packages
+    assert initial_package in initial_list["packages"]
+    assert len(initial_list) == 2
+    assert len(initial_list["packages"]) > 0
+    assert len(initial_list["packages"][initial_package]) == 4
+    assert initial_list["environment"] == str(env_directory)
 
     # Install a new package in the created environment
     install_result = manager_instance.install(packages=installed_packages, force=True)
