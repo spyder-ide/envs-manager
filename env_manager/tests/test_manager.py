@@ -111,3 +111,7 @@ def test_manager_backends(
     assert (
         uninstall_warning_message in subprocess_result.stdout + subprocess_result.stderr
     )
+
+    # Delete the environment
+    error_result, error_message = manager.delete_environment()
+    assert not error_result
