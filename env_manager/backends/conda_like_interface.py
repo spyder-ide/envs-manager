@@ -32,14 +32,12 @@ class CondaLikeInterface(EnvManagerInstance):
             return (False, f"{error.returncode}: {error.stderr}")
 
     def delete_environment(self, environment_path):
+        command = [self.executable, "remove", "-p", environment_path, "-y"]
         try:
-            subprocess.check_output(
-                [self.executable, "remove", "-p", environment_path, "-y"],
-                stderr=subprocess.PIPE,
-            )
-            return (True, "")
-        except Exception as e:
-            return (False, e.stderr)
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            return (True, result)
+        except Exception as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def activate_environment(self, environment_path):
         raise NotImplementedError()
