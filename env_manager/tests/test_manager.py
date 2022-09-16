@@ -157,6 +157,7 @@ def test_manager_backends(
         uninstall_warning_message in subprocess_result.stdout + subprocess_result.stderr
     )
 
+<<<<<<< HEAD
 
 @pytest.mark.parametrize(
     "manager_instance,initial_import_path,expected_export_path",
@@ -201,3 +202,8 @@ def test_manager_backends_import_export(
         generated_export.sort()
 
     assert generated_export == expected_export
+=======
+    # Delete the environment
+    error_result, error_message = manager.delete_environment()
+    assert not error_result
+>>>>>>> 6ad2377... delete environment
