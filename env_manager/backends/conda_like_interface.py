@@ -61,7 +61,10 @@ class CondaLikeInterface(EnvManagerInstance):
             result = subprocess.run(command, capture_output=True, check=True, text=True)
             return (True, result)
         except subprocess.CalledProcessError as error:
-            return (False, f"{error.returncode}: {error.stderr}")
+            return (
+                False,
+                f"{error.returncode}: {error.stderr}\nNote: Importing environments only works for environment definitions created with the same operating system.",
+            )
 
     def install_packages(
         self, environment_path, packages, channels=["conda-forge"], force=False
