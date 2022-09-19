@@ -40,10 +40,31 @@ class CondaLikeInterface(EnvManagerInstance):
         raise NotImplementedError()
 
     def export_environment(self, environment_path, export_file_path):
-        raise NotImplementedError()
+        command = [str(self.executable), "env", "export", "-p", environment_path]
+        try:
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            with open(export_file_path, "w") as exported_file:
+                exported_file.write(result.stdout)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def import_environment(self, environment_path, import_file_path):
-        raise NotImplementedError()
+        command = [
+            str(self.executable),
+            "create",
+            "-p",
+            environment_path,
+            f"--file={import_file_path}",
+        ]
+        try:
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (
+                False,
+                f"{error.returncode}: {error.stderr}\nNote: Importing environments only works for environment definitions created with the same operating system.",
+            )
 
     def install_packages(
         self, environment_path, packages, channels=["conda-forge"], force=False
