@@ -21,6 +21,7 @@ BACKENDS = [
             "WARNING: Skipping foo as it is not installed",
         ),
         None,
+        [2, 1, 2],
     ),
     (
         "conda-like",
@@ -29,6 +30,7 @@ BACKENDS = [
         ["foo"],
         ("libmamba Could not solve for environment specs", "Nothing to do"),
         os.environ.get("ENV_BACKEND_EXECUTABLE"),
+        [2, 1, 4],
     ),
 ]
 
@@ -41,7 +43,7 @@ def wait_until(condition, interval=0.1, timeout=1):
 
 @pytest.mark.parametrize(
     "backend,initial_package,installed_packages,errored_packages,"
-    "messages,executable",
+    "messages,executable,list_dimensions",
     BACKENDS,
 )
 def test_manager_backends(
@@ -51,6 +53,7 @@ def test_manager_backends(
     errored_packages,
     messages,
     executable,
+    list_dimensions,
     tmp_path,
 ):
     envs_directory = tmp_path / "envs"
@@ -70,9 +73,9 @@ def test_manager_backends(
 
     # List packages
     assert initial_package in initial_list["packages"]
-    assert len(initial_list) == 2
-    assert len(initial_list["packages"]) > 0
-    assert len(initial_list["packages"][initial_package]) == 4
+    assert len(initial_list) == list_dimensions[0]
+    assert len(initial_list["packages"]) > list_dimensions[1]
+    assert len(initial_list["packages"][initial_package]) == list_dimensions[2]
     assert initial_list["environment"] == str(env_directory)
 
     # Install a new package in the created environment
