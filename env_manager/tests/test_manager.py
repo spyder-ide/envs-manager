@@ -26,6 +26,8 @@ BACKENDS = [
             "Could not find a version that satisfies the requirement foo",
             "WARNING: Skipping foo as it is not installed",
         ),
+        None,
+        [2, 1, 2],
     ),
     (
         ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE")),
@@ -33,6 +35,8 @@ BACKENDS = [
         ["packaging"],
         ["foo"],
         ("libmamba Could not solve for environment specs", "Nothing to do"),
+        os.environ.get("ENV_BACKEND_EXECUTABLE"),
+        [2, 1, 4],
     ),
 ]
 
@@ -111,9 +115,9 @@ def test_manager_backends(
 
     # List packages
     assert initial_package in initial_list["packages"]
-    assert len(initial_list) == 2
-    assert len(initial_list["packages"]) > 0
-    assert len(initial_list["packages"][initial_package]) == 4
+    assert len(initial_list) == list_dimensions[0]
+    assert len(initial_list["packages"]) > list_dimensions[1]
+    assert len(initial_list["packages"][initial_package]) == list_dimensions[2]
     assert initial_list["environment"] == str(env_directory)
 
     # Install a new package in the created environment
