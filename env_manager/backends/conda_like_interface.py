@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+from distutils.cmd import Command
 from distutils.command.build import build
 import subprocess
 
@@ -40,6 +41,12 @@ class CondaLikeInterface(EnvManagerInstance):
             return (False, f"{error.returncode}: {error.stderr}")
 
     def activate_environment(self, environment_path):
+        command = [self.executable, "activate", environment_path]
+        try:
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            return (True, result)
+        except Exception as error:
+            return (False, f"{error.returncode}: {error.stderr}")
         raise NotImplementedError()
 
     def deactivate_environment(self, environment_path):

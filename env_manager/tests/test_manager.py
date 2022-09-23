@@ -26,7 +26,6 @@ BACKENDS = [
             "Could not find a version that satisfies the requirement foo",
             "WARNING: Skipping foo as it is not installed",
         ),
-        None,
         [2, 1, 2],
     ),
     (
@@ -35,7 +34,6 @@ BACKENDS = [
         ["packaging"],
         ["foo"],
         ("libmamba Could not solve for environment specs", "Nothing to do"),
-        os.environ.get("ENV_BACKEND_EXECUTABLE"),
         [2, 1, 4],
     ),
 ]
@@ -87,7 +85,7 @@ def packages_uninstalled(manager_instance, installed_packages):
 @pytest.fixture
 def manager_instance(request, tmp_path):
     backend, executable = request.param
-    envs_directory = tmp_path / "envs"
+    envs_directory = tmp_path / "environments"
     env_directory = envs_directory / f"test_{backend}"
     if backend == "conda-like":
         envs_directory.mkdir(parents=True)
@@ -97,17 +95,25 @@ def manager_instance(request, tmp_path):
     manager_instance = Manager(
         backend=backend, env_directory=str(env_directory), executable_path=executable
     )
+
     yield manager_instance
+
     manager_instance.delete_environment()
 
 
 @pytest.mark.parametrize(
-    "manager_instance,initial_package,installed_packages,errored_packages," "messages",
+    "manager_instance,initial_package,installed_packages,errored_packages,"
+    "messages, list_dimensions",
     BACKENDS,
     indirect=["manager_instance"],
 )
 def test_manager_backends(
-    manager_instance, initial_package, installed_packages, errored_packages, messages
+    manager_instance,
+    initial_package,
+    installed_packages,
+    errored_packages,
+    messages,
+    list_dimensions,
 ):
     # Create an environment with Python in it
     manager_instance.create_environment(packages=["python"])
@@ -118,7 +124,20 @@ def test_manager_backends(
     assert len(initial_list) == list_dimensions[0]
     assert len(initial_list["packages"]) > list_dimensions[1]
     assert len(initial_list["packages"][initial_package]) == list_dimensions[2]
-    assert initial_list["environment"] == str(env_directory)
+
+    # Activate/Deactivate Environment
+    manager_instance.activate()
+    result = manager_instance.list()
+    print("====================Activate=====================")
+
+    impr = " ".join(result["packages"])
+    print(impr)
+    manager_instance.deactivate()
+    result = manager_instance.list()
+    print("====================Deactivate=====================")
+
+    impr = " ".join(result["packages"])
+    print(impr)
 
     # Install a new package in the created environment
     install_result = manager_instance.install(packages=installed_packages, force=True)

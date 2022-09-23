@@ -42,10 +42,28 @@ class VEnvInterface(EnvManagerInstance):
         shutil.rmtree(environment_path)
 
     def activate_environment(self, environment_path):
-        raise NotImplementedError()
+        if os.name == "nt":
+            executable_path = Path(environment_path) / "Scripts" / "activate.bat"
+        else:
+            executable_path = Path(environment_path) / "bin" / "activate"
+        try:
+            command = [str(executable_path)]
+            result = self._run_command(command)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def deactivate_environment(self, environment_path):
-        raise NotImplementedError()
+        if os.name == "nt":
+            executable_path = Path(environment_path) / "Scripts" / "python.exe"
+        else:
+            executable_path = Path(environment_path) / "bin" / "python"
+        try:
+            command = [str(executable_path), "deactivate"]
+            result = self._run_command(command)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def export_environment(self, environment_path, export_file_path):
         if os.name == "nt":

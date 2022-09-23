@@ -30,7 +30,7 @@ class Manager:
             self.backend_instance.create_environment(self.env_directory, packages)
 
     def delete_environment(self):
-        self.backend_instance.delete_environment(self.env_directory)
+        return self.backend_instance.delete_environment(self.env_directory)
 
     def activate(self):
         self.backend_instance.activate_environment(self.env_directory)
