@@ -125,20 +125,6 @@ def test_manager_backends(
     assert len(initial_list["packages"]) > list_dimensions[1]
     assert len(initial_list["packages"][initial_package]) == list_dimensions[2]
 
-    # Activate/Deactivate Environment
-    manager_instance.activate()
-    result = manager_instance.list()
-    print("====================Activate=====================")
-
-    impr = " ".join(result["packages"])
-    print(impr)
-    manager_instance.deactivate()
-    result = manager_instance.list()
-    print("====================Deactivate=====================")
-
-    impr = " ".join(result["packages"])
-    print(impr)
-
     # Install a new package in the created environment
     install_result = manager_instance.install(packages=installed_packages, force=True)
     assert install_result[0]

@@ -27,7 +27,9 @@ class CondaLikeInterface(EnvManagerInstance):
         if channels:
             command += ["-c"] + channels
         try:
-            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            result = subprocess.run(
+                command, stderr=subprocess.PIPE, check=True, text=True
+            )
             return (True, result)
         except Exception as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -65,6 +67,7 @@ class CondaLikeInterface(EnvManagerInstance):
     def import_environment(self, environment_path, import_file_path):
         command = [
             str(self.executable),
+            "env",
             "create",
             "-p",
             environment_path,
