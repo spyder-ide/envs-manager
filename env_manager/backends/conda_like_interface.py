@@ -24,14 +24,21 @@ class CondaLikeInterface(EnvManagerInstance):
             command += packages
         if channels:
             command += ["-c"] + channels
-        result = subprocess.check_call(command)
-        print(result)
+        try:
+            result = subprocess.run(
+                command, stderr=subprocess.PIPE, check=True, text=True
+            )
+            return (True, result)
+        except Exception as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def delete_environment(self, environment_path):
-        result = subprocess.check_call(
-            [self.executable, "remove", "-p", environment_path, "-y"]
-        )
-        print(result)
+        command = [self.executable, "remove", "-p", environment_path, "-y"]
+        try:
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            return (True, result)
+        except Exception as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def activate_environment(self, environment_path):
         raise NotImplementedError()
@@ -105,5 +112,19 @@ class CondaLikeInterface(EnvManagerInstance):
         result = subprocess.check_output(
             [self.executable, "list", "-p", environment_path]
         ).decode("utf-8")
-        print(result)
-        return result.split("\r\n")
+        result = result.split("\r\n")
+        environment = environment_path
+        ret = {}
+        final_return = dict(environment=environment, packages=ret)
+        for i in range(3, len(result) - 1):
+            package_parts = result[i].split()
+            dicc = dict(
+                name=package_parts[0],
+                version=package_parts[1],
+                build=("None" if len(package_parts) <= 2 else package_parts[2]),
+                channel=("None" if len(package_parts) <= 3 else package_parts[3]),
+            )
+
+            ret[package_parts[0]] = dicc
+
+        return final_return

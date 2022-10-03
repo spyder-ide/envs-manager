@@ -26,6 +26,7 @@ BACKENDS = [
             "Could not find a version that satisfies the requirement foo",
             "WARNING: Skipping foo as it is not installed",
         ),
+        [2, 1, 2],
     ),
     (
         ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE")),
@@ -33,6 +34,7 @@ BACKENDS = [
         ["packaging"],
         ["foo"],
         ("libmamba Could not solve for environment specs", "Nothing to do"),
+        [2, 1, 4],
     ),
 ]
 
@@ -98,17 +100,27 @@ def manager_instance(request, tmp_path):
 
 
 @pytest.mark.parametrize(
-    "manager_instance,initial_package,installed_packages,errored_packages," "messages",
+    "manager_instance,initial_package,installed_packages,errored_packages,messages,list_dimensions",
     BACKENDS,
     indirect=["manager_instance"],
 )
 def test_manager_backends(
-    manager_instance, initial_package, installed_packages, errored_packages, messages
+    manager_instance,
+    initial_package,
+    installed_packages,
+    errored_packages,
+    messages,
+    list_dimensions,
 ):
     # Create an environment with Python in it
     manager_instance.create_environment(packages=["python"])
+
+    # List packages and check correct list result dimentions
     initial_list = manager_instance.list()
-    assert initial_package in " ".join(initial_list)
+    assert initial_package in initial_list["packages"]
+    assert len(initial_list) == list_dimensions[0]
+    assert len(initial_list["packages"]) > list_dimensions[1]
+    assert len(initial_list["packages"][initial_package]) == list_dimensions[2]
 
     # Install a new package in the created environment
     install_result = manager_instance.install(packages=installed_packages, force=True)
