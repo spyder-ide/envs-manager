@@ -50,7 +50,7 @@ class CondaLikeInterface(EnvManagerInstance):
         try:
             result = subprocess.run(command, capture_output=True, check=True, text=True)
             print(result.stdout)
-            shutil.rmtree(environment_path)
+            shutil.rmtree(environment_path, ignore_errors=True)
             return (True, result)
         except Exception as error:
             return (False, f"{error.returncode}: {error.stderr}")
