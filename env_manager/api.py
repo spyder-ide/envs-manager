@@ -8,6 +8,7 @@ class EnvManagerInstance:
 
     def __init__(self, executable_path=None):
         self.executable = executable_path
+        self.executable_variant = None
         assert self.validate(), f"{self.ID} backend unavailable!"
 
     def validate(self):
@@ -34,7 +35,9 @@ class EnvManagerInstance:
     def install_packages(self, environment_path, packages, channels=None, force=False):
         raise NotImplementedError()
 
-    def uninstall_packages(self, environment_path, packages, force=False):
+    def uninstall_packages(
+        self, environment_path, packages, force=False, capture_output=False
+    ):
         raise NotImplementedError()
 
     def list_packages(self, environment_path):

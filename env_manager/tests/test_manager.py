@@ -156,11 +156,12 @@ def test_manager_backends(
 
     # Try to uninstall unexisting package
     warning_result, subprocess_result = manager_instance.uninstall(
-        packages=errored_packages, force=True
+        packages=errored_packages, force=True, capture_output=True
     )
     assert warning_result
     assert (
-        uninstall_warning_message in subprocess_result.stdout + subprocess_result.stderr
+        uninstall_warning_message in subprocess_result.stdout
+        or uninstall_warning_message in subprocess_result.stderr
     )
 
 
