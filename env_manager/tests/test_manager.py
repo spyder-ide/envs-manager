@@ -115,7 +115,7 @@ def test_manager_backends(
     # Create an environment with Python in it
     manager_instance.create_environment(packages=["python"])
 
-    # List packages and check correct list result dimentions
+    # List packages and check correct list result dimensions
     initial_list = manager_instance.list()
     assert initial_package in initial_list["packages"]
     assert len(initial_list) == list_dimensions[0]
