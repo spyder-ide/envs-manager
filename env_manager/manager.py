@@ -58,9 +58,9 @@ class Manager:
                 self.env_directory, packages, force=force
             )
 
-    def uninstall(self, packages, force=False):
+    def uninstall(self, packages, force=False, capture_output=False):
         return self.backend_instance.uninstall_packages(
-            self.env_directory, packages, force=force
+            self.env_directory, packages, force=force, capture_output=capture_output
         )
 
     def list(self):

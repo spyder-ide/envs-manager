@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+import shutil
 import subprocess
 
 from env_manager.api import EnvManagerInstance
@@ -12,8 +13,19 @@ class CondaLikeInterface(EnvManagerInstance):
 
     def validate(self):
         if self.executable:
-            subprocess.check_output([self.executable, "-h"]).decode("utf-8")
-            return True
+            command = [self.executable, "--version"]
+            try:
+                result = subprocess.run(
+                    command, capture_output=True, check=True, text=True
+                )
+                version = result.stdout.split()
+                if len(version) <= 1:
+                    self.executable_variant = "micromamba"
+                else:
+                    self.executable_variant = version[0]
+                return True
+            except Exception as error:
+                print(error.stderr)
         return False
 
     def create_environment(
@@ -24,14 +36,24 @@ class CondaLikeInterface(EnvManagerInstance):
             command += packages
         if channels:
             command += ["-c"] + channels
-        result = subprocess.check_call(command)
-        print(result)
+        try:
+            result = subprocess.run(
+                command, stderr=subprocess.PIPE, check=True, text=True
+            )
+            print(result.stdout)
+            return (True, result)
+        except Exception as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def delete_environment(self, environment_path):
-        result = subprocess.check_call(
-            [self.executable, "remove", "-p", environment_path, "-y"]
-        )
-        print(result)
+        command = [self.executable, "remove", "-p", environment_path, "--all", "-y"]
+        try:
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            print(result.stdout)
+            shutil.rmtree(environment_path, ignore_errors=True)
+            return (True, result)
+        except Exception as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
     def activate_environment(self, environment_path):
         raise NotImplementedError()
@@ -45,6 +67,7 @@ class CondaLikeInterface(EnvManagerInstance):
             result = subprocess.run(command, capture_output=True, check=True, text=True)
             with open(export_file_path, "w") as exported_file:
                 exported_file.write(result.stdout)
+            print(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -59,6 +82,7 @@ class CondaLikeInterface(EnvManagerInstance):
         ]
         try:
             result = subprocess.run(command, capture_output=True, check=True, text=True)
+            print(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (
@@ -81,12 +105,17 @@ class CondaLikeInterface(EnvManagerInstance):
             channels = ["-c"] + channels
             command += channels
         try:
-            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            result = subprocess.run(
+                command, stderr=subprocess.PIPE, check=True, text=True
+            )
             return (True, result)
         except subprocess.CalledProcessError as error:
-            return (False, f"{error.returncode}: {error.stderr}")
+            formatted_error = f"{error.returncode}: {error.stderr}"
+            return (False, formatted_error)
 
-    def uninstall_packages(self, environment_path, packages, force=False):
+    def uninstall_packages(
+        self, environment_path, packages, force=False, capture_output=False
+    ):
         command = [
             str(self.executable),
             "remove",
@@ -96,14 +125,40 @@ class CondaLikeInterface(EnvManagerInstance):
         if force:
             command + ["-y"]
         try:
-            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            if capture_output:
+                result = subprocess.run(
+                    command, capture_output=capture_output, check=True, text=True
+                )
+            else:
+                result = subprocess.run(
+                    command, stderr=subprocess.PIPE, check=True, text=True
+                )
             return (True, result)
         except subprocess.CalledProcessError as error:
-            return (False, f"{error.returncode}: {error.stderr}")
+            formatted_error = f"{error.returncode}: {error.stderr}"
+            return (False, formatted_error)
 
     def list_packages(self, environment_path):
-        result = subprocess.check_output(
-            [self.executable, "list", "-p", environment_path]
-        ).decode("utf-8")
-        print(result)
-        return result.split("\r\n")
+        command = [self.executable, "list", "-p", environment_path]
+        result = subprocess.run(command, capture_output=True, check=True, text=True)
+        result_lines = result.stdout.split("\n")
+
+        if self.executable_variant == "micromamba":
+            skip_lines = 4
+        else:
+            skip_lines = 3
+        formatted_packages = {}
+        formatted_list = dict(environment=environment_path, packages=formatted_packages)
+
+        for package in result_lines[skip_lines:-1]:
+            package_info = package.split()
+            formatted_package = dict(
+                name=package_info[0],
+                version=package_info[1],
+                build=(None if len(package_info) <= 2 else package_info[2]),
+                channel=(None if len(package_info) <= 3 else package_info[3]),
+            )
+            formatted_packages[package_info[0]] = formatted_package
+
+        print(result.stdout)
+        return formatted_list
