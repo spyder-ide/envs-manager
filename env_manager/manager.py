@@ -48,10 +48,14 @@ class Manager:
             self.env_directory, import_file_path
         )
 
-    def install(self, packages=None, channels=None, force=False):
+    def install(self, packages=None, channels=None, force=False, capture_output=False):
         if channels:
             return self.backend_instance.install_packages(
-                self.env_directory, packages=packages, channels=channels, force=force
+                self.env_directory,
+                packages=packages,
+                channels=channels,
+                force=force,
+                capture_output=capture_output,
             )
         else:
             return self.backend_instance.install_packages(

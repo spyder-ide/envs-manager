@@ -23,8 +23,8 @@ BACKENDS = [
         ["packaging"],
         ["foo"],
         (
-            "Could not find a version that satisfies the requirement foo",
-            "WARNING: Skipping foo as it is not installed",
+            ["Could not find a version that satisfies the requirement foo"],
+            ["WARNING: Skipping foo as it is not installed"],
         ),
         [2, 1, 2],
     ),
@@ -33,7 +33,10 @@ BACKENDS = [
         "python",
         ["packaging"],
         ["foo"],
-        ("libmamba Could not solve for environment specs", "Nothing to do"),
+        (
+            ["libmamba Could not solve for environment specs", "PackagesNotFoundError"],
+            ["Nothing to do", "PackagesNotFoundError"],
+        ),
         [2, 1, 4],
     ),
 ]
@@ -68,18 +71,27 @@ def wait_until(condition, interval=0.1, timeout=1, **kwargs):
     start = time.time()
     while not condition(**kwargs) and time.time() - start < timeout:
         time.sleep(interval)
+    assert condition(**kwargs)
 
 
 def package_installed(manager_instance, installed_packages):
     package_list = manager_instance.list()
     for package in installed_packages:
-        return package in " ".join(package_list)
+        return package in package_list["packages"]
 
 
 def packages_uninstalled(manager_instance, installed_packages):
     package_list = manager_instance.list()
     for package in installed_packages:
-        return package not in " ".join(package_list)
+        return package not in package_list["packages"]
+
+
+def check_packages(manager_instance, package, version):
+    packages_list = manager_instance.list()
+    return (
+        package in packages_list["packages"]
+        and packages_list["packages"][package]["version"] == version
+    )
 
 
 @pytest.fixture
@@ -113,7 +125,7 @@ def test_manager_backends(
     list_dimensions,
 ):
     # Create an environment with Python in it
-    manager_instance.create_environment(packages=["python"])
+    manager_instance.create_environment(packages=["python==3.10"])
 
     # List packages and check correct list result dimensions
     initial_list = manager_instance.list()
@@ -152,16 +164,25 @@ def test_manager_backends(
         packages=errored_packages, force=True
     )
     assert not error_result
-    assert install_error_message in error_message
+    assert any(
+        [
+            install_expected_error in error_message
+            for install_expected_error in install_error_message
+        ]
+    )
 
     # Try to uninstall unexisting package
     warning_result, subprocess_result = manager_instance.uninstall(
         packages=errored_packages, force=True, capture_output=True
     )
+    print(subprocess_result)
     assert warning_result
-    assert (
-        uninstall_warning_message in subprocess_result.stdout
-        or uninstall_warning_message in subprocess_result.stderr
+    assert any(
+        [
+            uninstall_expected_error in subprocess_result.stdout
+            or uninstall_expected_error in subprocess_result.stderr
+            for uninstall_expected_error in uninstall_warning_message
+        ]
     )
 
 
@@ -178,13 +199,29 @@ def test_manager_backends_import_export(
     print(import_result[1])
     assert import_result[0]
     wait_until(
-        package_installed,
+        check_packages,
         manager_instance=manager_instance,
-        installed_packages=["packaging"],
+        package="packaging",
+        version="21.3",
     )
 
     # Install packaging 21.0
-    manager_instance.install(["packaging<=21.0"])
+    channels = None
+    if manager_instance.backend_instance.ID == "conda-like":
+        channels = ["conda-forge"]
+    install_result, message = manager_instance.install(
+        ["packaging==21.0"], channels=channels, force=True, capture_output=True
+    )
+    print(message)
+    assert install_result
+
+    # Wait until package is installed
+    wait_until(
+        check_packages,
+        manager_instance=manager_instance,
+        package="packaging",
+        version="21.0",
+    )
 
     # Export environment and check if is the expected one
     export_path_dir = tmp_path / "exported"
@@ -200,11 +237,15 @@ def test_manager_backends_import_export(
     assert export_path_file.exists()
 
     with open(expected_export_path) as expected_export_path_file:
-        expected_export = expected_export_path_file.readlines()
-        expected_export.sort()
+        expected_export = set()
+        for expected_line in expected_export_path_file.readlines():
+            if "=" in expected_line and "ca-certificates" not in expected_line:
+                expected_export.add(expected_line.strip())
 
     with open(export_path_file) as generated_export_path_file:
-        generated_export = generated_export_path_file.readlines()
-        generated_export.sort()
+        generated_export = set()
+        for generated_line in generated_export_path_file.readlines():
+            if "=" in generated_line and "ca-certificates" not in generated_line:
+                generated_export.add(generated_line.strip())
 
     assert generated_export == expected_export

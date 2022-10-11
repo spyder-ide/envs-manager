@@ -32,7 +32,14 @@ class EnvManagerInstance:
     def import_environment(self, environment_path, import_file_path):
         raise NotImplementedError()
 
-    def install_packages(self, environment_path, packages, channels=None, force=False):
+    def install_packages(
+        self,
+        environment_path,
+        packages,
+        channels=None,
+        force=False,
+        capture_output=False,
+    ):
         raise NotImplementedError()
 
     def uninstall_packages(

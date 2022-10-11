@@ -44,7 +44,17 @@ class VEnvInterface(EnvManagerInstance):
         builder = EnvBuilder(with_pip=True)
         builder.create(environment_path)
         if packages:
-            packages.remove("python")
+            try:
+                packages.remove("python")
+            except ValueError:
+                pass
+            possible_pythons = [
+                package
+                for package in packages
+                if package.startswith(("python=", "python<", "python>"))
+            ]
+            for possible_python in possible_pythons:
+                packages.remove(possible_python)
             if len(packages) > 0:
                 self.install_packages(environment_path, packages=packages)
 
@@ -91,14 +101,21 @@ class VEnvInterface(EnvManagerInstance):
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def install_packages(self, environment_path, packages, channels=None, force=False):
+    def install_packages(
+        self,
+        environment_path,
+        packages,
+        channels=None,
+        force=False,
+        capture_output=False,
+    ):
         if os.name == "nt":
             executable_path = Path(environment_path) / "Scripts" / "python.exe"
         else:
             executable_path = Path(environment_path) / "bin" / "python"
         try:
             command = [str(executable_path), "-m", "pip", "install"] + packages
-            result = self._run_command(command)
+            result = self._run_command(command, capture_output=capture_output)
             print(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:

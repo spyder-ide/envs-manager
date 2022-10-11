@@ -7,6 +7,9 @@ import subprocess
 
 from env_manager.api import EnvManagerInstance
 
+MICROMAMBA_VARIANT = "micromamba"
+CONDA_VARIANT = "conda"
+
 
 class CondaLikeInterface(EnvManagerInstance):
     ID = "conda-like"
@@ -20,7 +23,7 @@ class CondaLikeInterface(EnvManagerInstance):
                 )
                 version = result.stdout.split()
                 if len(version) <= 1:
-                    self.executable_variant = "micromamba"
+                    self.executable_variant = MICROMAMBA_VARIANT
                 else:
                     self.executable_variant = version[0]
                 return True
@@ -73,13 +76,23 @@ class CondaLikeInterface(EnvManagerInstance):
             return (False, f"{error.returncode}: {error.stderr}")
 
     def import_environment(self, environment_path, import_file_path):
-        command = [
-            str(self.executable),
-            "create",
-            "-p",
-            environment_path,
-            f"--file={import_file_path}",
-        ]
+        if self.executable_variant == MICROMAMBA_VARIANT:
+            command = [
+                str(self.executable),
+                "create",
+                "-p",
+                environment_path,
+                f"--file={import_file_path}",
+            ]
+        else:
+            command = [
+                str(self.executable),
+                "env",
+                "create",
+                "-p",
+                environment_path,
+                f"--file={import_file_path}",
+            ]
         try:
             result = subprocess.run(command, capture_output=True, check=True, text=True)
             print(result.stdout)
@@ -91,8 +104,15 @@ class CondaLikeInterface(EnvManagerInstance):
             )
 
     def install_packages(
-        self, environment_path, packages, channels=["conda-forge"], force=False
+        self,
+        environment_path,
+        packages,
+        channels=["conda-forge"],
+        force=False,
+        capture_output=False,
     ):
+        if self.executable_variant != MICROMAMBA_VARIANT:
+            packages = [f"'{package}'" for package in packages]
         command = [
             str(self.executable),
             "install",
@@ -105,9 +125,14 @@ class CondaLikeInterface(EnvManagerInstance):
             channels = ["-c"] + channels
             command += channels
         try:
-            result = subprocess.run(
-                command, stderr=subprocess.PIPE, check=True, text=True
-            )
+            if capture_output:
+                result = subprocess.run(
+                    command, capture_output=capture_output, check=True, text=True
+                )
+            else:
+                result = subprocess.run(
+                    command, stderr=subprocess.PIPE, check=True, text=True
+                )
             return (True, result)
         except subprocess.CalledProcessError as error:
             formatted_error = f"{error.returncode}: {error.stderr}"
@@ -135,6 +160,8 @@ class CondaLikeInterface(EnvManagerInstance):
                 )
             return (True, result)
         except subprocess.CalledProcessError as error:
+            if "PackagesNotFoundError" in error.stderr:
+                return (True, error)
             formatted_error = f"{error.returncode}: {error.stderr}"
             return (False, formatted_error)
 
@@ -143,7 +170,7 @@ class CondaLikeInterface(EnvManagerInstance):
         result = subprocess.run(command, capture_output=True, check=True, text=True)
         result_lines = result.stdout.split("\n")
 
-        if self.executable_variant == "micromamba":
+        if self.executable_variant == MICROMAMBA_VARIANT:
             skip_lines = 4
         else:
             skip_lines = 3
