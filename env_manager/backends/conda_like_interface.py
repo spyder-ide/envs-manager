@@ -127,7 +127,7 @@ class CondaLikeInterface(EnvManagerInstance):
         try:
             if capture_output:
                 result = subprocess.run(
-                    command, capture_output=capture_output, check=True, text=True
+                    command, capture_output=True, check=True, text=True
                 )
             else:
                 result = subprocess.run(
