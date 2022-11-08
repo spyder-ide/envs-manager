@@ -20,7 +20,13 @@ SUBCOMMANDS = [
     "list",
 ]
 
-BACKENDS = [("venv", ""), ("conda-like", "Transaction finished")]
+BACKENDS = [
+    ("venv", [""]),
+    (
+        "conda-like",
+        ["Transaction finished", "Executing transaction: ...working... done"],
+    ),
+]
 
 
 @pytest.mark.parametrize("subcommand", SUBCOMMANDS)
@@ -49,4 +55,4 @@ def test_cli_create(tmp_path, backend):
         ),
         shell=True,
     )
-    assert result in str(create_output)
+    assert any([expected_result in str(create_output) for expected_result in result])
