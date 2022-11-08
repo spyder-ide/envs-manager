@@ -239,13 +239,21 @@ def test_manager_backends_import_export(
     with open(expected_export_path) as expected_export_path_file:
         expected_export = set()
         for expected_line in expected_export_path_file.readlines():
-            if "=" in expected_line and "ca-certificates" not in expected_line:
+            if (
+                "=" in expected_line
+                and "ca-certificates" not in expected_line
+                and "openssl" not in expected_line
+            ):
                 expected_export.add(expected_line.strip())
 
     with open(export_path_file) as generated_export_path_file:
         generated_export = set()
         for generated_line in generated_export_path_file.readlines():
-            if "=" in generated_line and "ca-certificates" not in generated_line:
+            if (
+                "=" in generated_line
+                and "ca-certificates" not in generated_line
+                and "openssl" not in generated_line
+            ):
                 generated_export.add(generated_line.strip())
 
     assert generated_export == expected_export
