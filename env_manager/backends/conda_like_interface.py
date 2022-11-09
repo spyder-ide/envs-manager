@@ -15,8 +15,8 @@ class CondaLikeInterface(EnvManagerInstance):
     ID = "conda-like"
 
     def validate(self):
-        if self.executable:
-            command = [self.executable, "--version"]
+        if self.external_executable:
+            command = [self.external_executable, "--version"]
             try:
                 result = subprocess.run(
                     command, capture_output=True, check=True, text=True
@@ -31,10 +31,8 @@ class CondaLikeInterface(EnvManagerInstance):
                 print(error.stderr)
         return False
 
-    def create_environment(
-        self, environment_path, packages=[], channels=["conda-forge"]
-    ):
-        command = [self.executable, "create", "-p", environment_path]
+    def create_environment(self, packages=[], channels=["conda-forge"]):
+        command = [self.external_executable, "create", "-p", self.environment_path]
         if packages:
             command += packages
         if channels:
@@ -48,24 +46,37 @@ class CondaLikeInterface(EnvManagerInstance):
         except Exception as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def delete_environment(self, environment_path):
-        command = [self.executable, "remove", "-p", environment_path, "--all", "-y"]
+    def delete_environment(self):
+        command = [
+            self.external_executable,
+            "remove",
+            "-p",
+            self.environment_path,
+            "--all",
+            "-y",
+        ]
         try:
             result = subprocess.run(command, capture_output=True, check=True, text=True)
             print(result.stdout)
-            shutil.rmtree(environment_path, ignore_errors=True)
+            shutil.rmtree(self.environment_path, ignore_errors=True)
             return (True, result)
         except Exception as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def activate_environment(self, environment_path):
+    def activate_environment(self):
         raise NotImplementedError()
 
-    def deactivate_environment(self, environment_path):
+    def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, environment_path, export_file_path):
-        command = [str(self.executable), "env", "export", "-p", environment_path]
+    def export_environment(self, export_file_path):
+        command = [
+            self.external_executable,
+            "env",
+            "export",
+            "-p",
+            self.environment_path,
+        ]
         try:
             result = subprocess.run(command, capture_output=True, check=True, text=True)
             with open(export_file_path, "w") as exported_file:
@@ -75,22 +86,22 @@ class CondaLikeInterface(EnvManagerInstance):
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def import_environment(self, environment_path, import_file_path):
+    def import_environment(self, import_file_path):
         if self.executable_variant == MICROMAMBA_VARIANT:
             command = [
-                str(self.executable),
+                self.external_executable,
                 "create",
                 "-p",
-                environment_path,
+                self.environment_path,
                 f"--file={import_file_path}",
             ]
         else:
             command = [
-                str(self.executable),
+                self.external_executable,
                 "env",
                 "create",
                 "-p",
-                environment_path,
+                self.environment_path,
                 f"--file={import_file_path}",
             ]
         try:
@@ -105,7 +116,6 @@ class CondaLikeInterface(EnvManagerInstance):
 
     def install_packages(
         self,
-        environment_path,
         packages,
         channels=["conda-forge"],
         force=False,
@@ -114,10 +124,10 @@ class CondaLikeInterface(EnvManagerInstance):
         if self.executable_variant != MICROMAMBA_VARIANT:
             packages = [f"'{package}'" for package in packages]
         command = [
-            str(self.executable),
+            self.external_executable,
             "install",
             "-p",
-            str(environment_path),
+            self.environment_path,
         ] + packages
         if force:
             command += ["-y"]
@@ -138,14 +148,12 @@ class CondaLikeInterface(EnvManagerInstance):
             formatted_error = f"{error.returncode}: {error.stderr}"
             return (False, formatted_error)
 
-    def uninstall_packages(
-        self, environment_path, packages, force=False, capture_output=False
-    ):
+    def uninstall_packages(self, packages, force=False, capture_output=False):
         command = [
-            str(self.executable),
+            self.external_executable,
             "remove",
             "-p",
-            str(environment_path),
+            self.environment_path,
         ] + packages
         if force:
             command + ["-y"]
@@ -165,14 +173,12 @@ class CondaLikeInterface(EnvManagerInstance):
             formatted_error = f"{error.returncode}: {error.stderr}"
             return (False, formatted_error)
 
-    def update_packages(
-        self, environment_path, packages, force=False, capture_output=False
-    ):
+    def update_packages(self, packages, force=False, capture_output=False):
         command = [
-            str(self.executable),
+            self.external_executable,
             "update",
             "-p",
-            str(environment_path),
+            self.environment_path,
         ] + packages
         if force:
             command + ["-y"]
@@ -192,8 +198,8 @@ class CondaLikeInterface(EnvManagerInstance):
             formatted_error = f"{error.returncode}: {error.stderr}"
             return (False, formatted_error)
 
-    def list_packages(self, environment_path):
-        command = [self.executable, "list", "-p", environment_path]
+    def list_packages(self):
+        command = [self.external_executable, "list", "-p", self.environment_path]
         result = subprocess.run(command, capture_output=True, check=True, text=True)
         result_lines = result.stdout.split("\n")
 
@@ -202,7 +208,9 @@ class CondaLikeInterface(EnvManagerInstance):
         else:
             skip_lines = 3
         formatted_packages = {}
-        formatted_list = dict(environment=environment_path, packages=formatted_packages)
+        formatted_list = dict(
+            environment=self.environment_path, packages=formatted_packages
+        )
 
         for package in result_lines[skip_lines:-1]:
             package_info = package.split()

@@ -6,35 +6,35 @@
 class EnvManagerInstance:
     ID = ""
 
-    def __init__(self, executable_path=None):
-        self.executable = executable_path
+    def __init__(self, environment_path, external_executable=None):
+        self.environment_path = environment_path
+        self.external_executable = external_executable
         self.executable_variant = None
         assert self.validate(), f"{self.ID} backend unavailable!"
 
     def validate(self):
         pass
 
-    def create_environment(self, environment_path, packages=None, channels=None):
+    def create_environment(self, packages=None, channels=None):
         raise NotImplementedError()
 
-    def delete_environment(self, environment_path):
+    def delete_environment(self):
         raise NotImplementedError()
 
-    def activate_environment(self, environment_path):
+    def activate_environment(self):
         raise NotImplementedError()
 
-    def deactivate_environment(self, environment_path):
+    def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, environment_path, export_file_path):
+    def export_environment(self, export_file_path):
         raise NotImplementedError()
 
-    def import_environment(self, environment_path, import_file_path):
+    def import_environment(self, import_file_path):
         raise NotImplementedError()
 
     def install_packages(
         self,
-        environment_path,
         packages,
         channels=None,
         force=False,
@@ -42,15 +42,11 @@ class EnvManagerInstance:
     ):
         raise NotImplementedError()
 
-    def uninstall_packages(
-        self, environment_path, packages, force=False, capture_output=False
-    ):
+    def uninstall_packages(self, packages, force=False, capture_output=False):
         raise NotImplementedError()
 
-    def update_packages(
-        self, environment_path, packages, force=False, capture_output=False
-    ):
+    def update_packages(self, packages, force=False, capture_output=False):
         raise NotImplementedError()
 
-    def list_packages(self, environment_path):
+    def list_packages(self):
         raise NotImplementedError()

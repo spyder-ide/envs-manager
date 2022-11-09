@@ -107,7 +107,7 @@ def manager_instance(request, tmp_path):
         env_directory.mkdir(parents=True)
 
     manager_instance = Manager(
-        backend=backend, env_directory=str(env_directory), executable_path=executable
+        backend=backend, env_directory=env_directory, external_executable=executable
     )
     yield manager_instance
     manager_instance.delete_environment()

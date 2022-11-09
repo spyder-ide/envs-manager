@@ -16,61 +16,54 @@ class Manager:
         CondaLikeInterface.ID: CondaLikeInterface,
     }
 
-    def __init__(self, backend, env_directory, executable_path=None):
+    def __init__(self, backend, env_directory, external_executable=None):
         backend_class = self.BACKENDS[backend]
-        self.backend_instance = backend_class(executable_path=executable_path)
-        self.env_directory = env_directory
+        self.env_directory = str(env_directory)
+        self.backend_instance = backend_class(
+            str(env_directory), external_executable=str(external_executable)
+        )
 
     def create_environment(self, packages=None, channels=None):
         if channels:
-            self.backend_instance.create_environment(
-                self.env_directory, packages, channels
-            )
+            self.backend_instance.create_environment(packages, channels)
         else:
-            self.backend_instance.create_environment(self.env_directory, packages)
+            self.backend_instance.create_environment(packages)
 
     def delete_environment(self):
-        self.backend_instance.delete_environment(self.env_directory)
+        self.backend_instance.delete_environment()
 
     def activate(self):
-        self.backend_instance.activate_environment(self.env_directory)
+        self.backend_instance.activate_environment()
 
     def deactivate(self):
-        self.backend_instance.deactivate_environment(self.env_directory)
+        self.backend_instance.deactivate_environment()
 
     def export_environment(self, export_file_path):
-        return self.backend_instance.export_environment(
-            self.env_directory, export_file_path
-        )
+        return self.backend_instance.export_environment(export_file_path)
 
     def import_environment(self, import_file_path):
-        return self.backend_instance.import_environment(
-            self.env_directory, import_file_path
-        )
+        return self.backend_instance.import_environment(import_file_path)
 
     def install(self, packages=None, channels=None, force=False, capture_output=False):
         if channels:
             return self.backend_instance.install_packages(
-                self.env_directory,
                 packages=packages,
                 channels=channels,
                 force=force,
                 capture_output=capture_output,
             )
         else:
-            return self.backend_instance.install_packages(
-                self.env_directory, packages, force=force
-            )
+            return self.backend_instance.install_packages(packages, force=force)
 
     def uninstall(self, packages, force=False, capture_output=False):
         return self.backend_instance.uninstall_packages(
-            self.env_directory, packages, force=force, capture_output=capture_output
+            packages, force=force, capture_output=capture_output
         )
 
     def update(self, packages, force=False, capture_output=False):
         return self.backend_instance.update_packages(
-            self.env_directory, packages, force=force, capture_output=capture_output
+            packages, force=force, capture_output=capture_output
         )
 
     def list(self):
-        return self.backend_instance.list_packages(self.env_directory)
+        return self.backend_instance.list_packages()
