@@ -138,6 +138,21 @@ class VEnvInterface(EnvManagerInstance):
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
+    def update_packages(
+        self, environment_path, packages, force=False, capture_output=False
+    ):
+        if os.name == "nt":
+            executable_path = Path(environment_path) / "Scripts" / "python.exe"
+        else:
+            executable_path = Path(environment_path) / "bin" / "python"
+        try:
+            command = [str(executable_path), "-m", "pip", "install", "-U"]
+            command += packages
+            result = self._run_command(command, capture_output=capture_output)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
+
     def list_packages(self, environment_path):
         if os.name == "nt":
             executable_path = Path(environment_path) / "Scripts" / "python.exe"

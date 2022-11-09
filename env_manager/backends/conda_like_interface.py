@@ -165,6 +165,33 @@ class CondaLikeInterface(EnvManagerInstance):
             formatted_error = f"{error.returncode}: {error.stderr}"
             return (False, formatted_error)
 
+    def update_packages(
+        self, environment_path, packages, force=False, capture_output=False
+    ):
+        command = [
+            str(self.executable),
+            "update",
+            "-p",
+            str(environment_path),
+        ] + packages
+        if force:
+            command + ["-y"]
+        try:
+            if capture_output:
+                result = subprocess.run(
+                    command, capture_output=capture_output, check=True, text=True
+                )
+            else:
+                result = subprocess.run(
+                    command, stderr=subprocess.PIPE, check=True, text=True
+                )
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            if "PackagesNotFoundError" in error.stderr:
+                return (True, error)
+            formatted_error = f"{error.returncode}: {error.stderr}"
+            return (False, formatted_error)
+
     def list_packages(self, environment_path):
         command = [self.executable, "list", "-p", environment_path]
         result = subprocess.run(command, capture_output=True, check=True, text=True)

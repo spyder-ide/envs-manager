@@ -67,5 +67,10 @@ class Manager:
             self.env_directory, packages, force=force, capture_output=capture_output
         )
 
+    def update(self, packages, force=False, capture_output=False):
+        return self.backend_instance.update_packages(
+            self.env_directory, packages, force=force, capture_output=capture_output
+        )
+
     def list(self):
         return self.backend_instance.list_packages(self.env_directory)

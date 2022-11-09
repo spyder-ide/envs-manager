@@ -20,6 +20,7 @@ BACKENDS = [
     (
         ("venv", None),
         "pip",
+        ["packaging==21.0"],
         ["packaging"],
         ["foo"],
         (
@@ -31,6 +32,7 @@ BACKENDS = [
     (
         ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE")),
         "python",
+        ["packaging=21.0"],
         ["packaging"],
         ["foo"],
         (
@@ -77,7 +79,7 @@ def wait_until(condition, interval=0.1, timeout=1, **kwargs):
 def package_installed(manager_instance, installed_packages):
     package_list = manager_instance.list()
     for package in installed_packages:
-        return package in package_list["packages"]
+        return package.split("=")[0] in package_list["packages"]
 
 
 def packages_uninstalled(manager_instance, installed_packages):
@@ -112,7 +114,7 @@ def manager_instance(request, tmp_path):
 
 
 @pytest.mark.parametrize(
-    "manager_instance,initial_package,installed_packages,errored_packages,messages,list_dimensions",
+    "manager_instance,initial_package,installed_packages,updated_packages,errored_packages,messages,list_dimensions",
     BACKENDS,
     indirect=["manager_instance"],
 )
@@ -120,6 +122,7 @@ def test_manager_backends(
     manager_instance,
     initial_package,
     installed_packages,
+    updated_packages,
     errored_packages,
     messages,
     list_dimensions,
@@ -144,6 +147,11 @@ def test_manager_backends(
         manager_instance=manager_instance,
         installed_packages=installed_packages,
     )
+
+    # Update installed package
+    update_result = manager_instance.update(packages=updated_packages, force=True)
+    print(update_result)
+    assert update_result[0]
 
     # Uninstall the new package
     uninstall_result = manager_instance.uninstall(

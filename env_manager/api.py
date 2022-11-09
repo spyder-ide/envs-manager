@@ -47,5 +47,10 @@ class EnvManagerInstance:
     ):
         raise NotImplementedError()
 
+    def update_packages(
+        self, environment_path, packages, force=False, capture_output=False
+    ):
+        raise NotImplementedError()
+
     def list_packages(self, environment_path):
         raise NotImplementedError()
