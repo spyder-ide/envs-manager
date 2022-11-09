@@ -187,14 +187,14 @@ class CondaLikeInterface(EnvManagerInstance):
                 result = subprocess.run(
                     command, capture_output=capture_output, check=True, text=True
                 )
+                if "All requested packages already installed" in result.stdout:
+                    return (False, result.stdout)
             else:
                 result = subprocess.run(
                     command, stderr=subprocess.PIPE, check=True, text=True
                 )
             return (True, result)
         except subprocess.CalledProcessError as error:
-            if "PackagesNotFoundError" in error.stderr:
-                return (True, error)
             formatted_error = f"{error.returncode}: {error.stderr}"
             return (False, formatted_error)
 

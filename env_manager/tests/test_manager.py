@@ -25,6 +25,7 @@ BACKENDS = [
         ["foo"],
         (
             ["Could not find a version that satisfies the requirement foo"],
+            ["Could not find a version that satisfies the requirement foo"],
             ["WARNING: Skipping foo as it is not installed"],
         ),
         [2, 1, 2],
@@ -37,6 +38,7 @@ BACKENDS = [
         ["foo"],
         (
             ["libmamba Could not solve for environment specs", "PackagesNotFoundError"],
+            ["All requested packages already installed", "PackageNotInstalledError"],
             ["Nothing to do", "PackagesNotFoundError"],
         ),
         [2, 1, 4],
@@ -150,7 +152,6 @@ def test_manager_backends(
 
     # Update installed package
     update_result = manager_instance.update(packages=updated_packages, force=True)
-    print(update_result)
     assert update_result[0]
 
     # Uninstall the new package
@@ -166,30 +167,47 @@ def test_manager_backends(
         installed_packages=installed_packages,
     )
 
+    (
+        install_error_messages,
+        update_warning_messages,
+        uninstall_warning_messages,
+    ) = messages
     # Try to install unexisting package
-    install_error_message, uninstall_warning_message = messages
-    error_result, error_message = manager_instance.install(
+    install_error_result, install_error_message = manager_instance.install(
         packages=errored_packages, force=True
     )
-    assert not error_result
+    assert not install_error_result
     assert any(
         [
-            install_expected_error in error_message
-            for install_expected_error in install_error_message
+            install_expected_error in install_error_message
+            for install_expected_error in install_error_messages
+        ]
+    )
+
+    # Try to update unexisting package
+    update_error_result, update_error_message = manager_instance.update(
+        packages=errored_packages, force=True, capture_output=True
+    )
+    print(update_error_message)
+    assert not update_error_result
+    assert any(
+        [
+            update_expected_error in update_error_message
+            for update_expected_error in update_warning_messages
         ]
     )
 
     # Try to uninstall unexisting package
-    warning_result, subprocess_result = manager_instance.uninstall(
+    uninstall_warning_result, uninstall_warning_message = manager_instance.uninstall(
         packages=errored_packages, force=True, capture_output=True
     )
-    print(subprocess_result)
-    assert warning_result
+    print(uninstall_warning_message)
+    assert uninstall_warning_result
     assert any(
         [
-            uninstall_expected_error in subprocess_result.stdout
-            or uninstall_expected_error in subprocess_result.stderr
-            for uninstall_expected_error in uninstall_warning_message
+            uninstall_expected_error in uninstall_warning_message.stdout
+            or uninstall_expected_error in uninstall_warning_message.stderr
+            for uninstall_expected_error in uninstall_warning_messages
         ]
     )
 

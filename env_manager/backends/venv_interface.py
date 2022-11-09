@@ -37,7 +37,7 @@ class VEnvInterface(EnvManagerInstance):
         else:
             executable_path = Path(self.environment_path) / "bin" / "python"
 
-        return executable_path
+        return str(executable_path)
 
     def validate(self):
         try:
