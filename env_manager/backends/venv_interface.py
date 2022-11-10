@@ -30,6 +30,15 @@ class VEnvInterface(EnvManagerInstance):
             )
         return result
 
+    @property
+    def executable_path(self):
+        if os.name == "nt":
+            executable_path = Path(self.environment_path) / "Scripts" / "python.exe"
+        else:
+            executable_path = Path(self.environment_path) / "bin" / "python"
+
+        return str(executable_path)
+
     def validate(self):
         try:
             import venv
@@ -38,11 +47,11 @@ class VEnvInterface(EnvManagerInstance):
         except ImportError:
             return False
 
-    def create_environment(self, environment_path, packages=None, channels=None):
+    def create_environment(self, packages=None, channels=None):
         from venv import EnvBuilder
 
         builder = EnvBuilder(with_pip=True)
-        builder.create(environment_path)
+        builder.create(self.environment_path)
         if packages:
             try:
                 packages.remove("python")
@@ -56,24 +65,20 @@ class VEnvInterface(EnvManagerInstance):
             for possible_python in possible_pythons:
                 packages.remove(possible_python)
             if len(packages) > 0:
-                self.install_packages(environment_path, packages=packages)
+                self.install_packages(packages=packages)
 
-    def delete_environment(self, environment_path):
-        shutil.rmtree(environment_path)
+    def delete_environment(self):
+        shutil.rmtree(self.environment_path)
 
-    def activate_environment(self, environment_path):
+    def activate_environment(self):
         raise NotImplementedError()
 
-    def deactivate_environment(self, environment_path):
+    def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, environment_path, export_file_path):
-        if os.name == "nt":
-            executable_path = Path(environment_path) / "Scripts" / "python.exe"
-        else:
-            executable_path = Path(environment_path) / "bin" / "python"
+    def export_environment(self, export_file_path):
         try:
-            command = [str(executable_path), "-m", "pip", "list", "--format=freeze"]
+            command = [self.executable_path, "-m", "pip", "list", "--format=freeze"]
             result = self._run_command(command)
             with open(export_file_path, "w") as exported_file:
                 exported_file.write(result.stdout)
@@ -81,15 +86,11 @@ class VEnvInterface(EnvManagerInstance):
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def import_environment(self, environment_path, import_file_path):
-        self.create_environment(environment_path)
-        if os.name == "nt":
-            executable_path = Path(environment_path) / "Scripts" / "python.exe"
-        else:
-            executable_path = Path(environment_path) / "bin" / "python"
+    def import_environment(self, import_file_path):
+        self.create_environment()
         try:
             command = [
-                str(executable_path),
+                self.executable_path,
                 "-m",
                 "pip",
                 "install",
@@ -103,33 +104,22 @@ class VEnvInterface(EnvManagerInstance):
 
     def install_packages(
         self,
-        environment_path,
         packages,
         channels=None,
         force=False,
         capture_output=False,
     ):
-        if os.name == "nt":
-            executable_path = Path(environment_path) / "Scripts" / "python.exe"
-        else:
-            executable_path = Path(environment_path) / "bin" / "python"
         try:
-            command = [str(executable_path), "-m", "pip", "install"] + packages
+            command = [self.executable_path, "-m", "pip", "install"] + packages
             result = self._run_command(command, capture_output=capture_output)
             print(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def uninstall_packages(
-        self, environment_path, packages, force=False, capture_output=False
-    ):
-        if os.name == "nt":
-            executable_path = Path(environment_path) / "Scripts" / "python.exe"
-        else:
-            executable_path = Path(environment_path) / "bin" / "python"
+    def uninstall_packages(self, packages, force=False, capture_output=False):
         try:
-            command = [str(executable_path), "-m", "pip", "uninstall"]
+            command = [self.executable_path, "-m", "pip", "uninstall"]
             if force:
                 command += ["-y"]
             command += packages
@@ -138,18 +128,24 @@ class VEnvInterface(EnvManagerInstance):
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def list_packages(self, environment_path):
-        if os.name == "nt":
-            executable_path = Path(environment_path) / "Scripts" / "python.exe"
-        else:
-            executable_path = Path(environment_path) / "bin" / "python"
+    def update_packages(self, packages, force=False, capture_output=False):
+        try:
+            command = [self.executable_path, "-m", "pip", "install", "-U"]
+            command += packages
+            result = self._run_command(command, capture_output=capture_output)
+            return (True, result)
+        except subprocess.CalledProcessError as error:
+            return (False, f"{error.returncode}: {error.stderr}")
 
-        command = [str(executable_path), "-m", "pip", "list"]
+    def list_packages(self):
+        command = [self.executable_path, "-m", "pip", "list"]
         result = self._run_command(command)
         result_lines = result.stdout.split("\n")
 
         formatted_packages = {}
-        formatted_list = dict(environment=environment_path, packages=formatted_packages)
+        formatted_list = dict(
+            environment=self.environment_path, packages=formatted_packages
+        )
         for package in result_lines[2:-1]:
             package_info = package.split()
             formatted_package = dict(name=package_info[0], version=package_info[1])

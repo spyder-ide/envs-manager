@@ -17,6 +17,7 @@ SUBCOMMANDS = [
     "import",
     "install",
     "uninstall",
+    "update",
     "list",
 ]
 

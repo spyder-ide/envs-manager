@@ -108,6 +108,18 @@ def main(args=None):
         "packages", nargs="+", help="List of packages to uninstall."
     )
 
+    # Update packages
+    parser_update = main_subparser.add_parser(
+        "update",
+        help="Update packages in the "
+        "virtual Python "
+        "environment placed in the "
+        "target directory.",
+    )
+    parser_update.add_argument(
+        "packages", nargs="+", help="List of packages to update."
+    )
+
     # List packages
     parser_list = main_subparser.add_parser(
         "list",
@@ -119,11 +131,12 @@ def main(args=None):
 
     options = parser.parse_args(args)
     print(options)
-    executable_path = os.environ.get("ENV_BACKEND_EXECUTABLE")
+    external_executable = os.environ.get("ENV_BACKEND_EXECUTABLE")
+    print(f"Using ENV_BACKEND_EXECUTABLE: {external_executable}")
     manager = Manager(
         backend=options.backend,
         env_directory=options.env_directory,
-        executable_path=executable_path,
+        external_executable=external_executable,
     )
 
     if options.command == "create":
@@ -144,5 +157,7 @@ def main(args=None):
         manager.install(packages=options.packages)
     elif options.command == "uninstall":
         manager.uninstall(packages=options.packages)
+    elif options.command == "update":
+        manager.update(packages=options.packages)
     elif options.command == "list":
         manager.list()
