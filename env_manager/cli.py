@@ -4,13 +4,24 @@
 
 import argparse
 import os
-import uuid
 from pathlib import Path
 
 from env_manager.manager import Manager
 
+DEFAULT_BACKENDS_ROOT_PATH = Path(
+    os.environ.get("BACKENDS_ROOT_PATH", str(Path.home() / ".env-manager" / "backends"))
+)
+DEFAULT_BACKEND = os.environ.get("ENV_BACKEND", "venv")
+DEFAULT_ENVS_ROOT_PATH = DEFAULT_BACKENDS_ROOT_PATH / DEFAULT_BACKEND / "envs"
+EXTERNAL_EXECUTABLE = os.environ.get("ENV_BACKEND_EXECUTABLE", None)
+
 
 def main(args=None):
+    for backend in Manager.BACKENDS.keys():
+        (DEFAULT_BACKENDS_ROOT_PATH / backend / "envs").mkdir(
+            parents=True, exist_ok=True
+        )
+
     parser = argparse.ArgumentParser(
         prog=__name__,
         description="Manage a virtual Python " "environment in a target " "directory.",
@@ -18,7 +29,7 @@ def main(args=None):
     parser.add_argument(
         "-b",
         "--backend",
-        default=os.environ.get("ENV_BACKEND", "venv"),
+        default=DEFAULT_BACKEND,
         choices=list(Manager.BACKENDS.keys()),
         help="The implementation to "
         "create/manage a virtual "
@@ -26,10 +37,10 @@ def main(args=None):
         "directory.",
     )
     parser.add_argument(
-        "-ed",
-        "--env_directory",
-        default=os.environ.get("ENV_DIR", Path.cwd() / "envs" / str(uuid.uuid4())),
-        help="A directory where the virtual environment is or will be located following the structure <base path>/envs/<env name>.",
+        "-en",
+        "--env_name",
+        help="The name of a directory where the virtual environment is or will be locate."
+        "The environment is/will be located at <BACKENDS_ROOT_PATH>/<ENV_BACKEND>/envs/<env name>.",
     )
 
     main_subparser = parser.add_subparsers(title="commands", dest="command")
@@ -48,7 +59,8 @@ def main(args=None):
 
     # Delete env
     parser_delete = main_subparser.add_parser(
-        "delete", help="Delete a virtual Python environment in the target directory."
+        "delete",
+        help="Delete a virtual Python environment in the target directory.",
     )
 
     # Activate env
@@ -78,7 +90,8 @@ def main(args=None):
         help="Import a virtual Python environment in the target directory from a file.",
     )
     parser_import.add_argument(
-        "import_file_path", help="File path from where to import the environment."
+        "import_file_path",
+        help="File path from where to import the environment.",
     )
 
     # Install packages
@@ -129,14 +142,26 @@ def main(args=None):
         "target directory.",
     )
 
+    # List environments
+    parser_list_environments = main_subparser.add_parser(
+        "list-environments",
+        help="List discoverable environments available with the current configuration.",
+    )
+
     options = parser.parse_args(args)
     print(options)
-    external_executable = os.environ.get("ENV_BACKEND_EXECUTABLE")
-    print(f"Using ENV_BACKEND_EXECUTABLE: {external_executable}")
+    print(f"Using BACKENDS_ROOT_PATH: {DEFAULT_BACKENDS_ROOT_PATH}")
+    print(f"Using ENV_BACKEND: {options.backend}")
+    print(f"Using ENV_BACKEND_EXECUTABLE: {EXTERNAL_EXECUTABLE}")
+    print(f"Default root path to environments: {DEFAULT_ENVS_ROOT_PATH}")
+    env_directory = (
+        DEFAULT_BACKENDS_ROOT_PATH / options.backend / "envs" / options.env_name
+    )
     manager = Manager(
         backend=options.backend,
-        env_directory=options.env_directory,
-        external_executable=external_executable,
+        env_name=options.env_name,
+        root_path=DEFAULT_BACKENDS_ROOT_PATH,
+        external_executable=EXTERNAL_EXECUTABLE,
     )
 
     if options.command == "create":
@@ -161,3 +186,5 @@ def main(args=None):
         manager.update(packages=options.packages)
     elif options.command == "list":
         manager.list()
+    elif options.command == "list-environments":
+        manager.list_environments()

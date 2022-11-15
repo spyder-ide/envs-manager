@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+import os
 import subprocess
 
 import pytest
@@ -19,13 +20,15 @@ SUBCOMMANDS = [
     "uninstall",
     "update",
     "list",
+    "list-environments",
 ]
 
 BACKENDS = [
-    ("venv", [""]),
+    ("venv", [""], "test_env"),
     (
         "conda-like",
         ["Transaction finished", "Executing transaction: ...working... done"],
+        "test_env",
     ),
 ]
 
@@ -45,15 +48,36 @@ def test_cli_help(subcommand):
 
 
 @pytest.mark.parametrize("backend", BACKENDS)
-def test_cli_create(tmp_path, backend):
-    backend_value, result = backend
-    envs_directory = tmp_path / "envs"
-    envs_directory.mkdir(parents=True)
-    env_directory = envs_directory / "test_create"
+def test_cli(tmp_path, backend):
+    backend_value, create_result, list_env_result = backend
+    backends_root_path = tmp_path / "backends"
+    backends_root_path.mkdir(parents=True)
+    os.environ["BACKENDS_ROOT_PATH"] = str(backends_root_path)
+
+    # Check environment creation
     create_output = subprocess.check_output(
         " ".join(
-            ["env-manager", f"-b={backend_value}", f"-ed={env_directory}", "create"]
+            ["env-manager", f"-b={backend_value}", f"-en={list_env_result}", "create"]
         ),
         shell=True,
     )
-    assert any([expected_result in str(create_output) for expected_result in result])
+    assert any(
+        [
+            expected_create_result in str(create_output)
+            for expected_create_result in create_result
+        ]
+    )
+
+    # Check environment listing
+    list_env_output = subprocess.check_output(
+        " ".join(
+            [
+                "env-manager",
+                f"-b={backend_value}",
+                f"-en=test_create",
+                "list-environments",
+            ]
+        ),
+        shell=True,
+    )
+    assert list_env_result in str(list_env_output)

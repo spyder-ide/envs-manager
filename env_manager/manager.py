@@ -16,11 +16,25 @@ class Manager:
         CondaLikeInterface.ID: CondaLikeInterface,
     }
 
-    def __init__(self, backend, env_directory, external_executable=None):
+    def __init__(
+        self,
+        backend,
+        root_path=None,
+        env_name=None,
+        env_directory=None,
+        external_executable=None,
+    ):
         backend_class = self.BACKENDS[backend]
-        self.env_directory = str(env_directory)
+        if env_directory:
+            self.env_directory = str(env_directory)
+        elif root_path and env_name:
+            self.env_directory = root_path / backend / "envs" / env_name
+        else:
+            raise Exception(
+                "'env_directory' or 'root_path' and 'env_name' should be provided"
+            )
         self.backend_instance = backend_class(
-            str(env_directory), external_executable=str(external_executable)
+            str(self.env_directory), external_executable=str(external_executable)
         )
 
     def create_environment(self, packages=None, channels=None):
@@ -67,3 +81,13 @@ class Manager:
 
     def list(self):
         return self.backend_instance.list_packages()
+
+    def list_environments(self):
+        envs_directory = self.env_directory.parent
+        environments = {}
+        print("Name - Path")
+        for env_dir in envs_directory.iterdir():
+            if env_dir.is_dir():
+                environments[env_dir.name] = str(env_dir)
+                print(f"{env_dir.name} - {str(env_dir)}")
+        return environments

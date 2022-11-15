@@ -100,6 +100,7 @@ def check_packages(manager_instance, package, version):
 
 @pytest.fixture
 def manager_instance(request, tmp_path):
+    # TODO: Add handling for full env directory initialization or env name plus config initialization
     backend, executable = request.param
     envs_directory = tmp_path / "envs"
     env_directory = envs_directory / f"test_{backend}"
