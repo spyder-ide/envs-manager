@@ -18,7 +18,7 @@ ENV_FILES_CONDA_LIKE = ENV_FILES / "conda-like-files"
 ENV_FILES_VENV = ENV_FILES / "venv-files"
 BACKENDS = [
     (
-        ("venv", None),
+        ("venv", None, None),
         "pip",
         ["packaging==21.0"],
         ["packaging"],
@@ -31,7 +31,33 @@ BACKENDS = [
         [2, 1, 2],
     ),
     (
-        ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE")),
+        ("venv", None, "test_env"),
+        "pip",
+        ["packaging==21.0"],
+        ["packaging"],
+        ["foo"],
+        (
+            ["Could not find a version that satisfies the requirement foo"],
+            ["Could not find a version that satisfies the requirement foo"],
+            ["WARNING: Skipping foo as it is not installed"],
+        ),
+        [2, 1, 2],
+    ),
+    (
+        ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE"), None),
+        "python",
+        ["packaging=21.0"],
+        ["packaging"],
+        ["foo"],
+        (
+            ["libmamba Could not solve for environment specs", "PackagesNotFoundError"],
+            ["All requested packages already installed", "PackageNotInstalledError"],
+            ["Nothing to do", "PackagesNotFoundError"],
+        ),
+        [2, 1, 4],
+    ),
+    (
+        ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE"), "test_env"),
         "python",
         ["packaging=21.0"],
         ["packaging"],
@@ -55,12 +81,26 @@ else:
 
 IMPORT_EXPORT_BACKENDS = [
     (
-        ("venv", None),
+        ("venv", None, None),
         str(ENV_FILES_VENV / "venv_import_env.txt"),
         str(ENV_FILES_VENV / "venv_export_env.txt"),
     ),
     (
-        ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE")),
+        ("venv", None, "test_env"),
+        str(ENV_FILES_VENV / "venv_import_env.txt"),
+        str(ENV_FILES_VENV / "venv_export_env.txt"),
+    ),
+    (
+        ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE"), None),
+        str(
+            ENV_FILES_CONDA_LIKE / f"{BASE_IMPORT_EXPORT_FILENAME}_conda_import_env.yml"
+        ),
+        str(
+            ENV_FILES_CONDA_LIKE / f"{BASE_IMPORT_EXPORT_FILENAME}_conda_export_env.yml"
+        ),
+    ),
+    (
+        ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE"), "test_env"),
         str(
             ENV_FILES_CONDA_LIKE / f"{BASE_IMPORT_EXPORT_FILENAME}_conda_import_env.yml"
         ),
@@ -100,17 +140,27 @@ def check_packages(manager_instance, package, version):
 
 @pytest.fixture
 def manager_instance(request, tmp_path):
-    # TODO: Add handling for full env directory initialization or env name plus config initialization
-    backend, executable = request.param
-    envs_directory = tmp_path / "envs"
-    env_directory = envs_directory / f"test_{backend}"
-    if backend == "conda-like":
-        envs_directory.mkdir(parents=True)
+    backend, executable, env_name = request.param
+    if not env_name:
+        # Passing full env directory
+        root_path = None
+        envs_directory = tmp_path / "envs"
+        env_directory = envs_directory / f"test_{backend}"
+        if backend == "conda-like":
+            envs_directory.mkdir(parents=True)
+        else:
+            env_directory.mkdir(parents=True)
     else:
-        env_directory.mkdir(parents=True)
+        # Pass root_path and env_name letting manager create env directory path
+        root_path = tmp_path
+        env_directory = None
 
     manager_instance = Manager(
-        backend=backend, env_directory=env_directory, external_executable=executable
+        backend,
+        root_path=root_path,
+        env_name=env_name,
+        env_directory=env_directory,
+        external_executable=executable,
     )
     yield manager_instance
     manager_instance.delete_environment()
