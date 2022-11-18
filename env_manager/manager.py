@@ -25,6 +25,7 @@ class Manager:
         external_executable=None,
     ):
         backend_class = self.BACKENDS[backend]
+
         if env_directory:
             self.env_directory = str(env_directory)
         elif root_path and env_name:
@@ -33,6 +34,7 @@ class Manager:
             raise Exception(
                 "'env_directory' or 'root_path' and 'env_name' should be provided"
             )
+
         self.backend_instance = backend_class(
             str(self.env_directory), external_executable=str(external_executable)
         )
