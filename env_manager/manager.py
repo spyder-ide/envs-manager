@@ -111,5 +111,5 @@ class Manager:
                 print(f"{env_dir.name} - {str(env_dir)}")
         else:
             if first_environment:
-                print(f"No environments found for {backend} on {root_path}")
+                print(f"No environments found for {backend} in {root_path}")
         return environments
