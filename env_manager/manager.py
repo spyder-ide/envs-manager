@@ -2,8 +2,19 @@
 #
 # SPDX-License-Identifier: MIT
 
+import os
+from pathlib import Path
+
 from env_manager.backends.venv_interface import VEnvInterface
 from env_manager.backends.conda_like_interface import CondaLikeInterface
+
+
+DEFAULT_BACKENDS_ROOT_PATH = Path(
+    os.environ.get("BACKENDS_ROOT_PATH", str(Path.home() / ".env-manager" / "backends"))
+)
+DEFAULT_BACKEND = os.environ.get("ENV_BACKEND", "venv")
+DEFAULT_ENVS_ROOT_PATH = DEFAULT_BACKENDS_ROOT_PATH / DEFAULT_BACKEND / "envs"
+EXTERNAL_EXECUTABLE = os.environ.get("ENV_BACKEND_EXECUTABLE", None)
 
 
 class Manager:
@@ -84,12 +95,21 @@ class Manager:
     def list(self):
         return self.backend_instance.list_packages()
 
-    def list_environments(self):
-        envs_directory = self.env_directory.parent
+    @staticmethod
+    def list_environments(
+        backend=DEFAULT_BACKEND, root_path=DEFAULT_BACKENDS_ROOT_PATH
+    ):
+        envs_directory = Path(root_path) / backend / "envs"
         environments = {}
-        print("Name - Path")
+        first_environment = True
+        print(f"# {backend} environments")
         for env_dir in envs_directory.iterdir():
             if env_dir.is_dir():
+                if first_environment:
+                    first_environment = False
                 environments[env_dir.name] = str(env_dir)
                 print(f"{env_dir.name} - {str(env_dir)}")
+        else:
+            if first_environment:
+                print(f"No environments found for {backend} on {root_path}")
         return environments

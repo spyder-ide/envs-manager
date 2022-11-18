@@ -6,14 +6,13 @@ import argparse
 import os
 from pathlib import Path
 
-from env_manager.manager import Manager
-
-DEFAULT_BACKENDS_ROOT_PATH = Path(
-    os.environ.get("BACKENDS_ROOT_PATH", str(Path.home() / ".env-manager" / "backends"))
+from env_manager.manager import (
+    DEFAULT_BACKENDS_ROOT_PATH,
+    DEFAULT_BACKEND,
+    DEFAULT_ENVS_ROOT_PATH,
+    EXTERNAL_EXECUTABLE,
+    Manager,
 )
-DEFAULT_BACKEND = os.environ.get("ENV_BACKEND", "venv")
-DEFAULT_ENVS_ROOT_PATH = DEFAULT_BACKENDS_ROOT_PATH / DEFAULT_BACKEND / "envs"
-EXTERNAL_EXECUTABLE = os.environ.get("ENV_BACKEND_EXECUTABLE", None)
 
 
 def main(args=None):
@@ -154,37 +153,37 @@ def main(args=None):
     print(f"Using ENV_BACKEND: {options.backend}")
     print(f"Using ENV_BACKEND_EXECUTABLE: {EXTERNAL_EXECUTABLE}")
     print(f"Default root path to environments: {DEFAULT_ENVS_ROOT_PATH}")
-    env_directory = (
-        DEFAULT_BACKENDS_ROOT_PATH / options.backend / "envs" / options.env_name
-    )
-    manager = Manager(
-        backend=options.backend,
-        env_name=options.env_name,
-        root_path=DEFAULT_BACKENDS_ROOT_PATH,
-        external_executable=EXTERNAL_EXECUTABLE,
-    )
-
-    if options.command == "create":
-        manager.create_environment(
-            packages=options.packages or ["python"], channels=options.channels
+    if options.env_name:
+        manager = Manager(
+            backend=options.backend,
+            env_name=options.env_name,
+            root_path=DEFAULT_BACKENDS_ROOT_PATH,
+            external_executable=EXTERNAL_EXECUTABLE,
         )
-    elif options.command == "delete":
-        manager.delete_environment()
-    elif options.command == "activate":
-        manager.activate()
-    elif options.command == "deactivate":
-        manager.deactivate()
-    elif options.command == "export":
-        manager.export_environment(options.export_file_path)
-    elif options.command == "import":
-        manager.import_environment(options.import_file_path)
-    elif options.command == "install":
-        manager.install(packages=options.packages)
-    elif options.command == "uninstall":
-        manager.uninstall(packages=options.packages)
-    elif options.command == "update":
-        manager.update(packages=options.packages)
-    elif options.command == "list":
-        manager.list()
-    elif options.command == "list-environments":
-        manager.list_environments()
+        if options.command == "create":
+            manager.create_environment(
+                packages=options.packages or ["python"], channels=options.channels
+            )
+        elif options.command == "delete":
+            manager.delete_environment()
+        elif options.command == "activate":
+            manager.activate()
+        elif options.command == "deactivate":
+            manager.deactivate()
+        elif options.command == "export":
+            manager.export_environment(options.export_file_path)
+        elif options.command == "import":
+            manager.import_environment(options.import_file_path)
+        elif options.command == "install":
+            manager.install(packages=options.packages)
+        elif options.command == "uninstall":
+            manager.uninstall(packages=options.packages)
+        elif options.command == "update":
+            manager.update(packages=options.packages)
+        elif options.command == "list":
+            manager.list()
+    if options.command == "list-environments":
+        if options.backend:
+            Manager.list_environments(backend=options.backend)
+        else:
+            Manager.list_environments()
