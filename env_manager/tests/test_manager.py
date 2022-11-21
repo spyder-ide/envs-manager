@@ -28,7 +28,8 @@ BACKENDS = [
             ["Could not find a version that satisfies the requirement foo"],
             ["WARNING: Skipping foo as it is not installed"],
         ),
-        [2, 1, 2],
+        # Key returned by list call, Number of packages returned, Number of properties returned per package, Package description
+        [2, 1, 3, "The PyPA recommended tool for installing Python packages."],
     ),
     (
         ("venv", None, "test_env"),
@@ -41,7 +42,8 @@ BACKENDS = [
             ["Could not find a version that satisfies the requirement foo"],
             ["WARNING: Skipping foo as it is not installed"],
         ),
-        [2, 1, 2],
+        # Key returned by list call, Number of packages returned, Number of properties returned per package, Package description
+        [2, 1, 3, "The PyPA recommended tool for installing Python packages."],
     ),
     (
         ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE"), None),
@@ -54,7 +56,8 @@ BACKENDS = [
             ["All requested packages already installed", "PackageNotInstalledError"],
             ["Nothing to do", "PackagesNotFoundError"],
         ),
-        [2, 1, 4],
+        # Key returned by list call, Number of packages returned, Number of properties returned per package, Package description
+        [2, 1, 5, "General purpose programming language"],
     ),
     (
         ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE"), "test_env"),
@@ -67,7 +70,8 @@ BACKENDS = [
             ["All requested packages already installed", "PackageNotInstalledError"],
             ["Nothing to do", "PackagesNotFoundError"],
         ),
-        [2, 1, 4],
+        # Number of keys returned by list call, Number of packages returned, Number of properties returned per package, Package description
+        [2, 1, 5, "General purpose programming language"],
     ),
 ]
 
@@ -167,7 +171,7 @@ def manager_instance(request, tmp_path):
 
 
 @pytest.mark.parametrize(
-    "manager_instance,initial_package,installed_packages,updated_packages,errored_packages,messages,list_dimensions",
+    "manager_instance,initial_package,installed_packages,updated_packages,errored_packages,messages,list_info",
     BACKENDS,
     indirect=["manager_instance"],
 )
@@ -178,7 +182,7 @@ def test_manager_backends(
     updated_packages,
     errored_packages,
     messages,
-    list_dimensions,
+    list_info,
 ):
     # Create an environment with Python in it
     manager_instance.create_environment(packages=["python==3.10"])
@@ -186,9 +190,18 @@ def test_manager_backends(
     # List packages and check correct list result dimensions
     initial_list = manager_instance.list()
     assert initial_package in initial_list["packages"]
-    assert len(initial_list) == list_dimensions[0]
-    assert len(initial_list["packages"]) > list_dimensions[1]
-    assert len(initial_list["packages"][initial_package]) == list_dimensions[2]
+    (
+        list_info_number,
+        package_number,
+        package_info_number,
+        package_description,
+    ) = list_info
+    assert len(initial_list) == list_info_number
+    assert len(initial_list["packages"]) > package_number
+    assert len(initial_list["packages"][initial_package]) == package_info_number
+    assert (
+        initial_list["packages"][initial_package]["description"] == package_description
+    )
 
     # Install a new package in the created environment
     install_result = manager_instance.install(packages=installed_packages, force=True)

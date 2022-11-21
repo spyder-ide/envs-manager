@@ -7,7 +7,11 @@ import shutil
 import subprocess
 from pathlib import Path
 
+import requests
+
 from env_manager.api import EnvManagerInstance
+
+PYPI_API_PACKAGE_INFO_URL = "https://pypi.org/pypi/{package_name}/json"
 
 
 class VEnvInterface(EnvManagerInstance):
@@ -29,6 +33,11 @@ class VEnvInterface(EnvManagerInstance):
                 command, stderr=subprocess.PIPE, check=True, text=True, env=run_env
             )
         return result
+
+    def _get_package_info(self, package_name):
+        package_info_url = PYPI_API_PACKAGE_INFO_URL.format(package_name=package_name)
+        package_info = requests.get(package_info_url).json()
+        return package_info
 
     @property
     def executable_path(self):
@@ -147,9 +156,13 @@ class VEnvInterface(EnvManagerInstance):
             environment=self.environment_path, packages=formatted_packages
         )
         for package in result_lines[2:-1]:
-            package_info = package.split()
-            formatted_package = dict(name=package_info[0], version=package_info[1])
-            formatted_packages[package_info[0]] = formatted_package
+            package_name, package_version = package.split()
+            formatted_package = dict(
+                name=package_name,
+                version=package_version,
+                description=self._get_package_info(package_name)["info"]["summary"],
+            )
+            formatted_packages[package_name] = formatted_package
 
         print(result.stdout)
         return formatted_list
