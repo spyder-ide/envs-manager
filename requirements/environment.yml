@@ -4,6 +4,9 @@ dependencies:
   # Build dependencies
   - hatch
 
+  # Installation dependencies
+  - requests
+
   # For autoformat with Black
   - pre-commit
 
