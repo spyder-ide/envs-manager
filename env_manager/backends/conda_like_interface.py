@@ -229,18 +229,20 @@ class CondaLikeInterface(EnvManagerInstance):
             package_name = package_info[0]
             package_build = None if len(package_info) <= 2 else package_info[2]
             package_channel = None if len(package_info) <= 3 else package_info[3]
+            if package_channel:
+                package_description = self._get_package_info(
+                    package_name, channel=package_channel
+                )["summary"]
+            else:
+                package_description = None
             formatted_package = dict(
                 name=package_name,
                 version=package_info[1],
                 build=package_build,
                 channel=package_channel,
+                description=package_description,
             )
-            if package_channel:
-                package_description = self._get_package_info(
-                    package_name, channel=package_channel
-                )["summary"]
-            formatted_package["description"] = package_description
-            formatted_packages[package_info[0]] = formatted_package
+            formatted_packages[package_name] = formatted_package
 
         print(result.stdout)
         return formatted_list
