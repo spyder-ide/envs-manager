@@ -7,7 +7,7 @@ jobs:
   tests:
     name: Test Python ${{ matrix.python-version }} Executable ${{ matrix.conda-like }}
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       PYTHON_VERSION: ${{ matrix.python-version }}
     strategy:
