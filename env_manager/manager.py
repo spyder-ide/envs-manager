@@ -2,8 +2,19 @@
 #
 # SPDX-License-Identifier: MIT
 
+import os
+from pathlib import Path
+
 from env_manager.backends.venv_interface import VEnvInterface
 from env_manager.backends.conda_like_interface import CondaLikeInterface
+
+
+DEFAULT_BACKENDS_ROOT_PATH = Path(
+    os.environ.get("BACKENDS_ROOT_PATH", str(Path.home() / ".env-manager" / "backends"))
+)
+DEFAULT_BACKEND = os.environ.get("ENV_BACKEND", "venv")
+DEFAULT_ENVS_ROOT_PATH = DEFAULT_BACKENDS_ROOT_PATH / DEFAULT_BACKEND / "envs"
+EXTERNAL_EXECUTABLE = os.environ.get("ENV_BACKEND_EXECUTABLE", None)
 
 
 class Manager:
@@ -16,11 +27,27 @@ class Manager:
         CondaLikeInterface.ID: CondaLikeInterface,
     }
 
-    def __init__(self, backend, env_directory, external_executable=None):
+    def __init__(
+        self,
+        backend,
+        root_path=None,
+        env_name=None,
+        env_directory=None,
+        external_executable=None,
+    ):
         backend_class = self.BACKENDS[backend]
-        self.env_directory = str(env_directory)
+
+        if env_directory:
+            self.env_directory = str(env_directory)
+        elif root_path and env_name:
+            self.env_directory = root_path / backend / "envs" / env_name
+        else:
+            raise Exception(
+                "'env_directory' or 'root_path' and 'env_name' should be provided"
+            )
+
         self.backend_instance = backend_class(
-            str(env_directory), external_executable=str(external_executable)
+            str(self.env_directory), external_executable=str(external_executable)
         )
 
     def create_environment(self, packages=None, channels=None):
@@ -67,3 +94,22 @@ class Manager:
 
     def list(self):
         return self.backend_instance.list_packages()
+
+    @staticmethod
+    def list_environments(
+        backend=DEFAULT_BACKEND, root_path=DEFAULT_BACKENDS_ROOT_PATH
+    ):
+        envs_directory = Path(root_path) / backend / "envs"
+        environments = {}
+        first_environment = True
+        print(f"# {backend} environments")
+        for env_dir in envs_directory.iterdir():
+            if env_dir.is_dir():
+                if first_environment:
+                    first_environment = False
+                environments[env_dir.name] = str(env_dir)
+                print(f"{env_dir.name} - {str(env_dir)}")
+        else:
+            if first_environment:
+                print(f"No environments found for {backend} in {root_path}")
+        return environments
