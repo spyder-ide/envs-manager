@@ -39,14 +39,14 @@ jobs:
         shell: bash -l {0}
         run: |
           echo "ENV_BACKEND_EXECUTABLE=$CONDA/condabin/conda.bat" >> $GITHUB_ENV
-      - name: Install env-manager
+      - name: Install envs-manager
         shell: bash -l {0}
         run: |
           pip install -e .
       - name: Run tests
         shell: bash -l {0}
         run: |
-          pytest --cov-report xml --cov=env_manager -vv -x
+          pytest --cov-report xml --cov=envs_manager -vv -x
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:

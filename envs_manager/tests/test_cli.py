@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022-present Spyder Development Team and env-manager contributors
+# SPDX-FileCopyrightText: 2022-present Spyder Development Team and envs-manager contributors
 #
 # SPDX-License-Identifier: MIT
 
@@ -37,12 +37,12 @@ BACKENDS = [
 def test_cli_help(subcommand):
     if subcommand:
         subprocess.run(
-            ["env-manager", subcommand, "--help"],
+            ["envs-manager", subcommand, "--help"],
             check=True,
         )
     else:
         subprocess.run(
-            ["env-manager", "--help"],
+            ["envs-manager", "--help"],
             check=True,
         )
 
@@ -57,7 +57,7 @@ def test_cli(tmp_path, backend):
     # Check environment creation
     create_output = subprocess.check_output(
         " ".join(
-            ["env-manager", f"-b={backend_value}", f"-en={list_env_result}", "create"]
+            ["envs-manager", f"-b={backend_value}", f"-en={list_env_result}", "create"]
         ),
         shell=True,
     )
@@ -72,7 +72,7 @@ def test_cli(tmp_path, backend):
     list_env_output = subprocess.check_output(
         " ".join(
             [
-                "env-manager",
+                "envs-manager",
                 f"-b={backend_value}",
                 f"-en=test_create",
                 "list-environments",

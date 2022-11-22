@@ -1,16 +1,16 @@
-# env-manager
+# envs-manager
 
 ## Project information
-[![PyPI - Version](https://img.shields.io/pypi/v/env-manager.svg)](https://pypi.org/project/env-manager)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/env-manager.svg)](https://pypi.org/project/env-manager)
-[![conda version](https://img.shields.io/conda/vn/conda-forge/env-manager.svg)](https://www.anaconda.com/conda-forge/env-manager)
-[![download count](https://img.shields.io/conda/dn/conda-forge/env-manager.svg)](https://www.anaconda.com/conda-forge/env-manager)
+[![PyPI - Version](https://img.shields.io/pypi/v/envs-manager.svg)](https://pypi.org/project/envs-manager)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/envs-manager.svg)](https://pypi.org/project/envs-manager)
+[![conda version](https://img.shields.io/conda/vn/conda-forge/envs-manager.svg)](https://www.anaconda.com/conda-forge/envs-manager)
+[![download count](https://img.shields.io/conda/dn/conda-forge/envs-manager.svg)](https://www.anaconda.com/conda-forge/envs-manager)
 
 ## Build status
-[![Windows status](https://github.com/spyder-ide/env-manager/workflows/Windows%20tests/badge.svg)](https://github.com/spyder-ide/env-manager/actions?query=workflow%3A%22Windows+tests%22)
-[![Linux status](https://github.com/spyder-ide/env-manager/workflows/Linux%20tests/badge.svg)](https://github.com/spyder-ide/env-manager/actions?query=workflow%3A%22Linux+tests%22)
-[![MacOS status](https://github.com/spyder-ide/env-manager/workflows/Macos%20tests/badge.svg)](https://github.com/spyder-ide/env-manager/actions?query=workflow%3A%22Macos+tests%22)
-[![codecov](https://codecov.io/gh/spyder-ide/env-manager/branch/main/graph/badge.svg?token=H2GZWHIL43)](https://codecov.io/gh/spyder-ide/env-manager)
+[![Windows status](https://github.com/spyder-ide/envs-manager/workflows/Windows%20tests/badge.svg)](https://github.com/spyder-ide/envs-manager/actions?query=workflow%3A%22Windows+tests%22)
+[![Linux status](https://github.com/spyder-ide/envs-manager/workflows/Linux%20tests/badge.svg)](https://github.com/spyder-ide/envs-manager/actions?query=workflow%3A%22Linux+tests%22)
+[![MacOS status](https://github.com/spyder-ide/envs-manager/workflows/Macos%20tests/badge.svg)](https://github.com/spyder-ide/envs-manager/actions?query=workflow%3A%22Macos+tests%22)
+[![codecov](https://codecov.io/gh/spyder-ide/envs-manager/branch/main/graph/badge.svg?token=H2GZWHIL43)](https://codecov.io/gh/spyder-ide/envs-manager)
 
 -----
 
@@ -29,13 +29,13 @@
 ### PyPI
 
 ```console
-pip install env-manager
+pip install envs-manager
 ```
 
 ### Conda
 
 ```console
-conda install -c conda-forge env-manager
+conda install -c conda-forge envs-manager
 ```
 
 ## Development
@@ -44,14 +44,14 @@ conda install -c conda-forge env-manager
 
 ```console
 git clone <link to your fork.git>
-cd env-manager
+cd envs-manager
 ```
 
 * Create a Python environment and activate it. For example with conda:
 
 ```console
-conda env create -n env-manager --file requirements/environment.yml
-conda activate env-manager
+conda env create -n envs-manager --file requirements/environment.yml
+conda activate envs-manager
 ```
 
 * Install development version:
@@ -77,9 +77,9 @@ pytest -vv
 * To check the command line options you need to run:
 
 ```console
-env-manager --help
+envs-manager --help
 ```
 
 ## License
 
-`env-manager` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+`envs-manager` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.

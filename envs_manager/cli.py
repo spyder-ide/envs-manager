@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022-present Spyder Development Team and env-manager contributors
+# SPDX-FileCopyrightText: 2022-present Spyder Development Team and envs-manager contributors
 #
 # SPDX-License-Identifier: MIT
 
@@ -6,7 +6,7 @@ import argparse
 import os
 from pathlib import Path
 
-from env_manager.manager import (
+from envs_manager.manager import (
     DEFAULT_BACKENDS_ROOT_PATH,
     DEFAULT_BACKEND,
     DEFAULT_ENVS_ROOT_PATH,
