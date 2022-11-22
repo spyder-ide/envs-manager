@@ -85,12 +85,20 @@ class VEnvInterface(EnvManagerInstance):
     def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, export_file_path):
+    def export_environment(self, export_file_path=None):
         try:
-            command = [self.executable_path, "-m", "pip", "list", "--format=freeze"]
+            command = [
+                self.executable_path,
+                "-m",
+                "pip",
+                "list",
+                "--format=freeze",
+                "--not-required",
+            ]
             result = self._run_command(command)
-            with open(export_file_path, "w") as exported_file:
-                exported_file.write(result.stdout)
+            if export_file_path:
+                with open(export_file_path, "w") as exported_file:
+                    exported_file.write(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -163,7 +171,10 @@ class VEnvInterface(EnvManagerInstance):
             formatted_package = dict(
                 name=package_name,
                 version=package_version,
+                build=None,
+                channel=None,
                 description=package_description,
+                requested=True,
             )
             formatted_packages[package_name] = formatted_package
 

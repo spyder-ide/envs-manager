@@ -21,7 +21,10 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: Implementation :: CPython",
 ]
-dependencies = ["requests"]
+dependencies = [
+  "pyyaml",
+  "requests"
+]
 dynamic = ["version"]
 
 [project.urls]

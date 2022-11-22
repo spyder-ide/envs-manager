@@ -29,7 +29,7 @@ BACKENDS = [
             ["WARNING: Skipping foo as it is not installed"],
         ),
         # Key returned by list call, Number of packages returned, Number of properties returned per package, Package description
-        [2, 1, 3, "The PyPA recommended tool for installing Python packages."],
+        [2, 1, 6, "The PyPA recommended tool for installing Python packages."],
     ),
     (
         ("venv", None, "test_env"),
@@ -43,7 +43,7 @@ BACKENDS = [
             ["WARNING: Skipping foo as it is not installed"],
         ),
         # Key returned by list call, Number of packages returned, Number of properties returned per package, Package description
-        [2, 1, 3, "The PyPA recommended tool for installing Python packages."],
+        [2, 1, 6, "The PyPA recommended tool for installing Python packages."],
     ),
     (
         ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE"), None),
@@ -57,7 +57,7 @@ BACKENDS = [
             ["Nothing to do", "PackagesNotFoundError"],
         ),
         # Key returned by list call, Number of packages returned, Number of properties returned per package, Package description
-        [2, 1, 5, "General purpose programming language"],
+        [2, 1, 6, "General purpose programming language"],
     ),
     (
         ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE"), "test_env"),
@@ -71,7 +71,7 @@ BACKENDS = [
             ["Nothing to do", "PackagesNotFoundError"],
         ),
         # Number of keys returned by list call, Number of packages returned, Number of properties returned per package, Package description
-        [2, 1, 5, "General purpose programming language"],
+        [2, 1, 6, "General purpose programming language"],
     ),
 ]
 

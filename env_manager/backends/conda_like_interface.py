@@ -5,6 +5,7 @@
 import shutil
 import subprocess
 
+import yaml
 import requests
 
 from env_manager.api import EnvManagerInstance
@@ -81,19 +82,21 @@ class CondaLikeInterface(EnvManagerInstance):
     def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, export_file_path):
+    def export_environment(self, export_file_path=None):
         command = [
             self.external_executable,
             "env",
             "export",
             "-p",
             self.environment_path,
+            "--from-history",
         ]
         try:
             result = subprocess.run(command, capture_output=True, check=True, text=True)
-            with open(export_file_path, "w") as exported_file:
-                exported_file.write(result.stdout)
-            print(result.stdout)
+            if export_file_path:
+                with open(export_file_path, "w") as exported_file:
+                    exported_file.write(result.stdout)
+                print(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -214,6 +217,13 @@ class CondaLikeInterface(EnvManagerInstance):
         command = [self.external_executable, "list", "-p", self.environment_path]
         result = subprocess.run(command, capture_output=True, check=True, text=True)
         result_lines = result.stdout.split("\n")
+        export_env_result, export_env_data = self.export_environment()
+        if export_env_result:
+            packages_requested = yaml.load(
+                export_env_data.stdout, Loader=yaml.FullLoader
+            )["dependencies"]
+        else:
+            packages_requested = []
 
         if self.executable_variant == MICROMAMBA_VARIANT:
             skip_lines = 4
@@ -235,12 +245,14 @@ class CondaLikeInterface(EnvManagerInstance):
                 )["summary"]
             else:
                 package_description = None
+            package_requested = package_name in packages_requested
             formatted_package = dict(
                 name=package_name,
                 version=package_info[1],
                 build=package_build,
                 channel=package_channel,
                 description=package_description,
+                requested=package_requested,
             )
             formatted_packages[package_name] = formatted_package
 
