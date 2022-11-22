@@ -5,6 +5,7 @@ dependencies:
   - hatch
 
   # Installation dependencies
+  - pyyaml
   - requests
 
   # For autoformat with Black
