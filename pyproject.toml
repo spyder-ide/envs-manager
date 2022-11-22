@@ -3,17 +3,17 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "env-manager"
+name = "envs-manager"
 description = ''
 readme = "README.md"
 requires-python = ">=3.7"
 license = "MIT"
 keywords = []
 authors = [
-  { name = "Spyder Development Team and env-manager contributors", email = "spyder.python@gmail.com" },
+  { name = "Spyder Development Team and envs-manager contributors", email = "spyder.python@gmail.com" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 2 - Pre-Alpha",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
@@ -28,12 +28,12 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://github.com/spyder-ide/env-manager#readme"
-Issues = "https://github.com/spyder-ide/env-manager/issues"
-Source = "https://github.com/spyder-ide/env-manager"
+Documentation = "https://github.com/spyder-ide/envs-manager#readme"
+Issues = "https://github.com/spyder-ide/envs-manager/issues"
+Source = "https://github.com/spyder-ide/envs-manager"
 
 [project.scripts]
-env-manager = "env_manager.cli:main"
+envs-manager = "envs_manager.cli:main"
 
 [project.optional-dependencies]
 test = [
@@ -45,7 +45,7 @@ pre-commit = [
 ]
 
 [tool.hatch.version]
-path = "env_manager/__about__.py"
+path = "envs_manager/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 [tool.hatch.build.targets.wheel]
@@ -56,7 +56,7 @@ dependencies = [
   "pytest-cov",
 ]
 [tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=env_manager --cov=tests"
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=envs_manager --cov=tests"
 no-cov = "cov --no-cov"
 
 [[tool.hatch.envs.test.matrix]]
@@ -66,7 +66,7 @@ python = ["37", "310"]
 branch = true
 parallel = true
 omit = [
-  "env_manager/__about__.py",
+  "envs_manager/__about__.py",
 ]
 
 [tool.coverage.report]

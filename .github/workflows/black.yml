@@ -8,7 +8,7 @@ jobs:
     name: Black with Pre-Commit
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout env-manager repository
+    - name: Checkout envs-manager repository
       uses: actions/checkout@v3
     - name: Set up Python
       uses: actions/setup-python@v4

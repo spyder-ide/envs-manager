@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022-present Spyder Development Team and env-manager contributors
+# SPDX-FileCopyrightText: 2022-present Spyder Development Team and envs-manager contributors
 #
 # SPDX-License-Identifier: MIT
 
@@ -9,7 +9,7 @@ import sys
 
 import pytest
 
-from env_manager.manager import Manager
+from envs_manager.manager import Manager
 
 
 TESTS_DIR = Path(__file__).parent.absolute()

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022-present Spyder Development Team and env-manager contributors
+# SPDX-FileCopyrightText: 2022-present Spyder Development Team and envs-manager contributors
 #
 # SPDX-License-Identifier: MIT
 
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import requests
 
-from env_manager.api import EnvManagerInstance
+from envs_manager.api import EnvManagerInstance
 
 PYPI_API_PACKAGE_INFO_URL = "https://pypi.org/pypi/{package_name}/json"
 

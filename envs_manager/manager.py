@@ -1,16 +1,18 @@
-# SPDX-FileCopyrightText: 2022-present Spyder Development Team and env-manager contributors
+# SPDX-FileCopyrightText: 2022-present Spyder Development Team and envs-manager contributors
 #
 # SPDX-License-Identifier: MIT
 
 import os
 from pathlib import Path
 
-from env_manager.backends.venv_interface import VEnvInterface
-from env_manager.backends.conda_like_interface import CondaLikeInterface
+from envs_manager.backends.venv_interface import VEnvInterface
+from envs_manager.backends.conda_like_interface import CondaLikeInterface
 
 
 DEFAULT_BACKENDS_ROOT_PATH = Path(
-    os.environ.get("BACKENDS_ROOT_PATH", str(Path.home() / ".env-manager" / "backends"))
+    os.environ.get(
+        "BACKENDS_ROOT_PATH", str(Path.home() / ".envs-manager" / "backends")
+    )
 )
 DEFAULT_BACKEND = os.environ.get("ENV_BACKEND", "venv")
 DEFAULT_ENVS_ROOT_PATH = DEFAULT_BACKENDS_ROOT_PATH / DEFAULT_BACKEND / "envs"

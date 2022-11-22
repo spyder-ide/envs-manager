@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022-present Spyder Development Team and env-manager contributors
+# SPDX-FileCopyrightText: 2022-present Spyder Development Team and envs-manager contributors
 #
 # SPDX-License-Identifier: MIT
 
@@ -8,7 +8,7 @@ import subprocess
 import yaml
 import requests
 
-from env_manager.api import EnvManagerInstance
+from envs_manager.api import EnvManagerInstance
 
 MICROMAMBA_VARIANT = "micromamba"
 CONDA_VARIANT = "conda"
