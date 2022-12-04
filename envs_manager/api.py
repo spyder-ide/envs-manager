@@ -15,10 +15,10 @@ class EnvManagerInstance:
     def validate(self):
         pass
 
-    def create_environment(self, packages=None, channels=None):
+    def create_environment(self, packages=None, channels=None, force=False):
         raise NotImplementedError()
 
-    def delete_environment(self):
+    def delete_environment(self, force=False):
         raise NotImplementedError()
 
     def activate_environment(self):
@@ -27,10 +27,10 @@ class EnvManagerInstance:
     def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, export_file_path=None):
+    def export_environment(self, export_file_path=None, force=False):
         raise NotImplementedError()
 
-    def import_environment(self, import_file_path):
+    def import_environment(self, import_file_path, force=False):
         raise NotImplementedError()
 
     def install_packages(

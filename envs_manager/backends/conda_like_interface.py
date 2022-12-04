@@ -61,15 +61,16 @@ class CondaLikeInterface(EnvManagerInstance):
         except Exception as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def delete_environment(self):
+    def delete_environment(self, force=False):
         command = [
             self.external_executable,
             "remove",
             "-p",
             self.environment_path,
             "--all",
-            "-y",
         ]
+        if force:
+            command += ["-y"]
         try:
             result = subprocess.run(command, capture_output=True, check=True, text=True)
             print(result.stdout)
@@ -84,7 +85,7 @@ class CondaLikeInterface(EnvManagerInstance):
     def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, export_file_path=None):
+    def export_environment(self, export_file_path=None, force=False):
         command = [
             self.external_executable,
             "env",
@@ -93,6 +94,8 @@ class CondaLikeInterface(EnvManagerInstance):
             self.environment_path,
             "--from-history",
         ]
+        if force:
+            command += ["-y"]
         try:
             result = subprocess.run(command, capture_output=True, check=True, text=True)
             if export_file_path:
@@ -103,7 +106,7 @@ class CondaLikeInterface(EnvManagerInstance):
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def import_environment(self, import_file_path):
+    def import_environment(self, import_file_path, force=False):
         if self.executable_variant == MICROMAMBA_VARIANT:
             command = [
                 self.external_executable,
@@ -121,6 +124,8 @@ class CondaLikeInterface(EnvManagerInstance):
                 self.environment_path,
                 f"--file={import_file_path}",
             ]
+        if force:
+            command += ["-y"]
         try:
             result = subprocess.run(command, capture_output=True, check=True, text=True)
             print(result.stdout)

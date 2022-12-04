@@ -56,7 +56,7 @@ class VEnvInterface(EnvManagerInstance):
         except ImportError:
             return False
 
-    def create_environment(self, packages=None, channels=None):
+    def create_environment(self, packages=None, channels=None, force=False):
         from venv import EnvBuilder
 
         builder = EnvBuilder(with_pip=True)
@@ -76,7 +76,7 @@ class VEnvInterface(EnvManagerInstance):
             if len(packages) > 0:
                 self.install_packages(packages=packages)
 
-    def delete_environment(self):
+    def delete_environment(self, force=False):
         shutil.rmtree(self.environment_path)
 
     def activate_environment(self):
@@ -85,7 +85,7 @@ class VEnvInterface(EnvManagerInstance):
     def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, export_file_path=None):
+    def export_environment(self, export_file_path=None, force=False):
         try:
             command = [
                 self.executable_path,
@@ -103,7 +103,7 @@ class VEnvInterface(EnvManagerInstance):
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def import_environment(self, import_file_path):
+    def import_environment(self, import_file_path, force=False):
         self.create_environment()
         try:
             command = [
