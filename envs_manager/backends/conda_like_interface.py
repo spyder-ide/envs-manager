@@ -44,12 +44,14 @@ class CondaLikeInterface(EnvManagerInstance):
                 print(error.stderr)
         return False
 
-    def create_environment(self, packages=[], channels=["conda-forge"]):
+    def create_environment(self, packages=[], channels=["conda-forge"], force=False):
         command = [self.external_executable, "create", "-p", self.environment_path]
         if packages:
             command += packages
         if channels:
             command += ["-c"] + channels
+        if force:
+            command += ["-y"]
         try:
             result = subprocess.run(
                 command, stderr=subprocess.PIPE, check=True, text=True
