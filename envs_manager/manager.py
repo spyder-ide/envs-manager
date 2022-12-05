@@ -74,8 +74,8 @@ class Manager:
     def export_environment(self, export_file_path):
         return self.backend_instance.export_environment(export_file_path)
 
-    def import_environment(self, import_file_path):
-        return self.backend_instance.import_environment(import_file_path)
+    def import_environment(self, import_file_path, force=False):
+        return self.backend_instance.import_environment(import_file_path, force=force)
 
     def install(self, packages=None, channels=None, force=False, capture_output=False):
         if channels:
