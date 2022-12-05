@@ -109,6 +109,7 @@ class Manager:
         environments = {}
         first_environment = True
         print(f"# {backend} environments")
+        envs_directory.mkdir(parents=True, exist_ok=True)
         for env_dir in envs_directory.iterdir():
             if env_dir.is_dir():
                 if first_environment:
