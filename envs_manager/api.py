@@ -2,6 +2,25 @@
 #
 # SPDX-License-Identifier: MIT
 
+# Standard library imports
+import subprocess
+
+
+def run_command(command, capture_output=True, run_env=None):
+    if capture_output:
+        result = subprocess.run(
+            command,
+            capture_output=capture_output,
+            check=True,
+            text=True,
+            env=run_env,
+        )
+    else:
+        result = subprocess.run(
+            command, stderr=subprocess.PIPE, check=True, text=True, env=run_env
+        )
+    return result
+
 
 class EnvManagerInstance:
     ID = ""
