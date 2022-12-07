@@ -2,6 +2,43 @@
 #
 # SPDX-License-Identifier: MIT
 
+# Standard library imports
+import subprocess
+
+
+def run_command(command, capture_output=True, run_env=None):
+    """
+    Run commands using `subprocess.run`
+
+    Parameters
+    ----------
+    command : list[str]
+        List of string arguments that conform the command to be executed.
+    capture_output : bool, optional
+        If the output (stdout and stderr) of the command should be stored. The default is True.
+    run_env : dict, optional
+        Process environment to use when running the command. The default is None.
+
+    Returns
+    -------
+    result : subprocess.CompletedProcess
+        The completed process result object.
+
+    """
+    if capture_output:
+        result = subprocess.run(
+            command,
+            capture_output=capture_output,
+            check=True,
+            text=True,
+            env=run_env,
+        )
+    else:
+        result = subprocess.run(
+            command, stderr=subprocess.PIPE, check=True, text=True, env=run_env
+        )
+    return result
+
 
 class EnvManagerInstance:
     ID = ""

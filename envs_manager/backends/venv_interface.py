@@ -9,7 +9,7 @@ from pathlib import Path
 
 import requests
 
-from envs_manager.api import EnvManagerInstance
+from envs_manager.api import EnvManagerInstance, run_command
 
 PYPI_API_PACKAGE_INFO_URL = "https://pypi.org/pypi/{package_name}/json"
 
@@ -20,18 +20,7 @@ class VEnvInterface(EnvManagerInstance):
     def _run_command(self, command, capture_output=True):
         run_env = os.environ.copy()
         run_env["PIP_REQUIRE_VIRTUALENV"] = "true"
-        if capture_output:
-            result = subprocess.run(
-                command,
-                capture_output=capture_output,
-                check=True,
-                text=True,
-                env=run_env,
-            )
-        else:
-            result = subprocess.run(
-                command, stderr=subprocess.PIPE, check=True, text=True, env=run_env
-            )
+        result = run_command(command, capture_output=capture_output, run_env=run_env)
         return result
 
     def _get_package_info(self, package_name):

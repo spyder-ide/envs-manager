@@ -8,7 +8,7 @@ import subprocess
 import yaml
 import requests
 
-from envs_manager.api import EnvManagerInstance
+from envs_manager.api import EnvManagerInstance, run_command
 
 MICROMAMBA_VARIANT = "micromamba"
 CONDA_VARIANT = "conda"
@@ -31,9 +31,7 @@ class CondaLikeInterface(EnvManagerInstance):
         if self.external_executable:
             command = [self.external_executable, "--version"]
             try:
-                result = subprocess.run(
-                    command, capture_output=True, check=True, text=True
-                )
+                result = run_command(command, capture_output=True)
                 version = result.stdout.split()
                 if len(version) <= 1:
                     self.executable_variant = MICROMAMBA_VARIANT
@@ -51,9 +49,7 @@ class CondaLikeInterface(EnvManagerInstance):
         if channels:
             command += ["-c"] + channels
         try:
-            result = subprocess.run(
-                command, stderr=subprocess.PIPE, check=True, text=True
-            )
+            result = run_command(command, capture_output=True)
             print(result.stdout)
             return (True, result)
         except Exception as error:
@@ -69,7 +65,7 @@ class CondaLikeInterface(EnvManagerInstance):
             "-y",
         ]
         try:
-            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            result = run_command(command, capture_output=True)
             print(result.stdout)
             shutil.rmtree(self.environment_path, ignore_errors=True)
             return (True, result)
@@ -92,7 +88,7 @@ class CondaLikeInterface(EnvManagerInstance):
             "--from-history",
         ]
         try:
-            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            result = run_command(command, capture_output=True)
             if export_file_path:
                 with open(export_file_path, "w") as exported_file:
                     exported_file.write(result.stdout)
@@ -120,7 +116,7 @@ class CondaLikeInterface(EnvManagerInstance):
                 f"--file={import_file_path}",
             ]
         try:
-            result = subprocess.run(command, capture_output=True, check=True, text=True)
+            result = run_command(command, capture_output=True)
             print(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
@@ -150,14 +146,7 @@ class CondaLikeInterface(EnvManagerInstance):
             channels = ["-c"] + channels
             command += channels
         try:
-            if capture_output:
-                result = subprocess.run(
-                    command, capture_output=True, check=True, text=True
-                )
-            else:
-                result = subprocess.run(
-                    command, stderr=subprocess.PIPE, check=True, text=True
-                )
+            result = run_command(command, capture_output=capture_output)
             return (True, result)
         except subprocess.CalledProcessError as error:
             formatted_error = f"{error.returncode}: {error.stderr}"
@@ -173,14 +162,7 @@ class CondaLikeInterface(EnvManagerInstance):
         if force:
             command + ["-y"]
         try:
-            if capture_output:
-                result = subprocess.run(
-                    command, capture_output=capture_output, check=True, text=True
-                )
-            else:
-                result = subprocess.run(
-                    command, stderr=subprocess.PIPE, check=True, text=True
-                )
+            result = run_command(command, capture_output=capture_output)
             return (True, result)
         except subprocess.CalledProcessError as error:
             if "PackagesNotFoundError" in error.stderr:
@@ -198,24 +180,19 @@ class CondaLikeInterface(EnvManagerInstance):
         if force:
             command + ["-y"]
         try:
+            result = run_command(command, capture_output=capture_output)
             if capture_output:
-                result = subprocess.run(
-                    command, capture_output=capture_output, check=True, text=True
-                )
                 if "All requested packages already installed" in result.stdout:
                     return (False, result.stdout)
             else:
-                result = subprocess.run(
-                    command, stderr=subprocess.PIPE, check=True, text=True
-                )
-            return (True, result)
+                return (True, result)
         except subprocess.CalledProcessError as error:
             formatted_error = f"{error.returncode}: {error.stderr}"
             return (False, formatted_error)
 
     def list_packages(self):
         command = [self.external_executable, "list", "-p", self.environment_path]
-        result = subprocess.run(command, capture_output=True, check=True, text=True)
+        result = run_command(command, capture_output=True)
         result_lines = result.stdout.split("\n")
         export_env_result, export_env_data = self.export_environment()
         if export_env_result:
