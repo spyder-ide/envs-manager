@@ -27,7 +27,7 @@ class EnvManagerInstance:
     def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, export_file_path=None, force=False):
+    def export_environment(self, export_file_path=None):
         raise NotImplementedError()
 
     def import_environment(self, import_file_path, force=False):

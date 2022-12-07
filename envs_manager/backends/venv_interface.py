@@ -57,24 +57,28 @@ class VEnvInterface(EnvManagerInstance):
             return False
 
     def create_environment(self, packages=None, channels=None, force=False):
-        from venv import EnvBuilder
+        try:
+            from venv import EnvBuilder
 
-        builder = EnvBuilder(with_pip=True)
-        builder.create(self.environment_path)
-        if packages:
-            try:
-                packages.remove("python")
-            except ValueError:
-                pass
-            possible_pythons = [
-                package
-                for package in packages
-                if package.startswith(("python=", "python<", "python>"))
-            ]
-            for possible_python in possible_pythons:
-                packages.remove(possible_python)
-            if len(packages) > 0:
-                self.install_packages(packages=packages)
+            builder = EnvBuilder(with_pip=True)
+            builder.create(self.environment_path)
+            if packages:
+                try:
+                    packages.remove("python")
+                except ValueError:
+                    pass
+                possible_pythons = [
+                    package
+                    for package in packages
+                    if package.startswith(("python=", "python<", "python>"))
+                ]
+                for possible_python in possible_pythons:
+                    packages.remove(possible_python)
+                if len(packages) > 0:
+                    return self.install_packages(packages=packages)
+                return (True, None)
+        except Exception as error:
+            return (False, str(error))
 
     def delete_environment(self, force=False):
         shutil.rmtree(self.environment_path)
@@ -85,7 +89,7 @@ class VEnvInterface(EnvManagerInstance):
     def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, export_file_path=None, force=False):
+    def export_environment(self, export_file_path=None):
         try:
             command = [
                 self.executable_path,

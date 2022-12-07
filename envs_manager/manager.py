@@ -62,8 +62,8 @@ class Manager:
         else:
             return self.backend_instance.create_environment(packages, force=force)
 
-    def delete_environment(self):
-        return self.backend_instance.delete_environment()
+    def delete_environment(self, force=False):
+        return self.backend_instance.delete_environment(force=force)
 
     def activate(self):
         self.backend_instance.activate_environment()
@@ -71,8 +71,10 @@ class Manager:
     def deactivate(self):
         self.backend_instance.deactivate_environment()
 
-    def export_environment(self, export_file_path):
-        return self.backend_instance.export_environment(export_file_path)
+    def export_environment(self, export_file_path=None):
+        return self.backend_instance.export_environment(
+            export_file_path=export_file_path
+        )
 
     def import_environment(self, import_file_path, force=False):
         return self.backend_instance.import_environment(import_file_path, force=force)

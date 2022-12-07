@@ -85,7 +85,7 @@ class CondaLikeInterface(EnvManagerInstance):
     def deactivate_environment(self):
         raise NotImplementedError()
 
-    def export_environment(self, export_file_path=None, force=False):
+    def export_environment(self, export_file_path=None):
         command = [
             self.external_executable,
             "env",
@@ -94,8 +94,6 @@ class CondaLikeInterface(EnvManagerInstance):
             self.environment_path,
             "--from-history",
         ]
-        if force:
-            command += ["-y"]
         try:
             result = subprocess.run(command, capture_output=True, check=True, text=True)
             if export_file_path:
