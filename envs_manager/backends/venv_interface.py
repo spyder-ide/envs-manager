@@ -45,27 +45,31 @@ class VEnvInterface(EnvManagerInstance):
         except ImportError:
             return False
 
-    def create_environment(self, packages=None, channels=None):
-        from venv import EnvBuilder
+    def create_environment(self, packages=None, channels=None, force=False):
+        try:
+            from venv import EnvBuilder
 
-        builder = EnvBuilder(with_pip=True)
-        builder.create(self.environment_path)
-        if packages:
-            try:
-                packages.remove("python")
-            except ValueError:
-                pass
-            possible_pythons = [
-                package
-                for package in packages
-                if package.startswith(("python=", "python<", "python>"))
-            ]
-            for possible_python in possible_pythons:
-                packages.remove(possible_python)
-            if len(packages) > 0:
-                self.install_packages(packages=packages)
+            builder = EnvBuilder(with_pip=True)
+            builder.create(self.environment_path)
+            if packages:
+                try:
+                    packages.remove("python")
+                except ValueError:
+                    pass
+                possible_pythons = [
+                    package
+                    for package in packages
+                    if package.startswith(("python=", "python<", "python>"))
+                ]
+                for possible_python in possible_pythons:
+                    packages.remove(possible_python)
+                if len(packages) > 0:
+                    return self.install_packages(packages=packages)
+                return (True, None)
+        except Exception as error:
+            return (False, str(error))
 
-    def delete_environment(self):
+    def delete_environment(self, force=False):
         shutil.rmtree(self.environment_path)
 
     def activate_environment(self):
@@ -92,7 +96,7 @@ class VEnvInterface(EnvManagerInstance):
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def import_environment(self, import_file_path):
+    def import_environment(self, import_file_path, force=False):
         self.create_environment()
         try:
             command = [

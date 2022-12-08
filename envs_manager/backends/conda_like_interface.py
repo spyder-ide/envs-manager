@@ -42,12 +42,14 @@ class CondaLikeInterface(EnvManagerInstance):
                 print(error.stderr)
         return False
 
-    def create_environment(self, packages=[], channels=["conda-forge"]):
+    def create_environment(self, packages=[], channels=["conda-forge"], force=False):
         command = [self.external_executable, "create", "-p", self.environment_path]
         if packages:
             command += packages
         if channels:
             command += ["-c"] + channels
+        if force:
+            command += ["-y"]
         try:
             result = run_command(command, capture_output=True)
             print(result.stdout)
@@ -55,15 +57,16 @@ class CondaLikeInterface(EnvManagerInstance):
         except Exception as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def delete_environment(self):
+    def delete_environment(self, force=False):
         command = [
             self.external_executable,
             "remove",
             "-p",
             self.environment_path,
             "--all",
-            "-y",
         ]
+        if force:
+            command += ["-y"]
         try:
             result = run_command(command, capture_output=True)
             print(result.stdout)
@@ -97,7 +100,7 @@ class CondaLikeInterface(EnvManagerInstance):
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
 
-    def import_environment(self, import_file_path):
+    def import_environment(self, import_file_path, force=False):
         if self.executable_variant == MICROMAMBA_VARIANT:
             command = [
                 self.external_executable,
@@ -106,6 +109,8 @@ class CondaLikeInterface(EnvManagerInstance):
                 self.environment_path,
                 f"--file={import_file_path}",
             ]
+            if force:
+                command += ["-y"]
         else:
             command = [
                 self.external_executable,
@@ -115,6 +120,8 @@ class CondaLikeInterface(EnvManagerInstance):
                 self.environment_path,
                 f"--file={import_file_path}",
             ]
+            if force:
+                command += ["--force"]
         try:
             result = run_command(command, capture_output=True)
             print(result.stdout)

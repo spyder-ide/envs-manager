@@ -37,7 +37,9 @@ class Manager:
         env_directory=None,
         external_executable=None,
     ):
-        backend_class = self.BACKENDS[backend]
+        self.backend_class = self.BACKENDS[backend]
+        self.env_name = env_name
+        self.root_path = root_path
 
         if env_directory:
             self.env_directory = str(env_directory)
@@ -48,18 +50,20 @@ class Manager:
                 "'env_directory' or 'root_path' and 'env_name' should be provided"
             )
 
-        self.backend_instance = backend_class(
+        self.backend_instance = self.backend_class(
             str(self.env_directory), external_executable=str(external_executable)
         )
 
-    def create_environment(self, packages=None, channels=None):
+    def create_environment(self, packages=None, channels=None, force=False):
         if channels:
-            self.backend_instance.create_environment(packages, channels)
+            return self.backend_instance.create_environment(
+                packages, channels=channels, force=force
+            )
         else:
-            self.backend_instance.create_environment(packages)
+            return self.backend_instance.create_environment(packages, force=force)
 
-    def delete_environment(self):
-        self.backend_instance.delete_environment()
+    def delete_environment(self, force=False):
+        return self.backend_instance.delete_environment(force=force)
 
     def activate(self):
         self.backend_instance.activate_environment()
@@ -67,11 +71,13 @@ class Manager:
     def deactivate(self):
         self.backend_instance.deactivate_environment()
 
-    def export_environment(self, export_file_path):
-        return self.backend_instance.export_environment(export_file_path)
+    def export_environment(self, export_file_path=None):
+        return self.backend_instance.export_environment(
+            export_file_path=export_file_path
+        )
 
-    def import_environment(self, import_file_path):
-        return self.backend_instance.import_environment(import_file_path)
+    def import_environment(self, import_file_path, force=False):
+        return self.backend_instance.import_environment(import_file_path, force=force)
 
     def install(self, packages=None, channels=None, force=False, capture_output=False):
         if channels:
@@ -105,6 +111,7 @@ class Manager:
         environments = {}
         first_environment = True
         print(f"# {backend} environments")
+        envs_directory.mkdir(parents=True, exist_ok=True)
         for env_dir in envs_directory.iterdir():
             if env_dir.is_dir():
                 if first_environment:
