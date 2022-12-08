@@ -187,9 +187,10 @@ def test_manager_backends(
 ):
     # Create an environment with Python in it
     with capsys.disabled():
-        create_result, __ = manager_instance.create_environment(
+        create_result, _ = manager_instance.create_environment(
             packages=["python==3.10"], force=True
         )
+    assert create_result
 
     # List packages and check correct list result dimensions
     initial_list = manager_instance.list()
@@ -209,7 +210,7 @@ def test_manager_backends(
 
     # Install a new package in the created environment
     with capsys.disabled():
-        install_result, __ = manager_instance.install(
+        install_result, _ = manager_instance.install(
             packages=installed_packages, force=True
         )
     assert install_result
@@ -223,14 +224,14 @@ def test_manager_backends(
 
     # Update installed package
     with capsys.disabled():
-        update_result, __ = manager_instance.update(
+        update_result, _ = manager_instance.update(
             packages=updated_packages, force=True
         )
     assert update_result
 
     # Uninstall the new package
     with capsys.disabled():
-        uninstall_result, __ = manager_instance.uninstall(
+        uninstall_result, _ = manager_instance.uninstall(
             packages=installed_packages, force=True
         )
     assert uninstall_result
