@@ -1,10 +1,13 @@
 # envs-manager
 
 ## Project information
-[![PyPI - Version](https://img.shields.io/pypi/v/envs-manager.svg)](https://pypi.org/project/envs-manager)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/envs-manager.svg)](https://pypi.org/project/envs-manager)
-[![conda version](https://img.shields.io/conda/vn/conda-forge/envs-manager.svg)](https://www.anaconda.com/conda-forge/envs-manager)
-[![download count](https://img.shields.io/conda/dn/conda-forge/envs-manager.svg)](https://www.anaconda.com/conda-forge/envs-manager)
+
+[![PyPI - Version](https://img.shields.io/pypi/v/envs-manager.svg)](https://pypi.org/project/envs-manager)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/envs-manager)](https://pypi.org/project/envs-manager)
+
+[![conda - version](https://img.shields.io/conda/vn/conda-forge/envs-manager.svg)](https://www.anaconda.org/conda-forge/envs-manager)
+[![conda - Downloads](https://img.shields.io/conda/dn/conda-forge/envs-manager.svg)](https://www.anaconda.org/conda-forge/envs-manager)
 
 ## Build status
 [![Windows status](https://github.com/spyder-ide/envs-manager/workflows/Windows%20tests/badge.svg)](https://github.com/spyder-ide/envs-manager/actions?query=workflow%3A%22Windows+tests%22)
@@ -23,8 +26,6 @@
 - [License](#license)
 
 ## Installation
-
-*Note:* This package is not available yet for installation but it will be in the coming months.
 
 ### PyPI
 
@@ -68,7 +69,7 @@ pre-commit install
 
 * To run the test:
 
-You will need to setup the `ENV_BACKEND_EXECUTABLE` environmental variable in order to use a `conda-like` manager. The environmental variable should point to a conda or mamba executable. For example, if you have micromamba downloaded on Windows you should set `ENV_BACKEND_EXECUTABLE=<path to micromama executable>/micromamba.exe`. After that you should be able to run the tests with:
+You will need to setup the `ENV_BACKEND_EXECUTABLE` environmental variable in order to use a `conda-like` manager. The environmental variable should point to a conda or mamba executable. For example, if you have micromamba downloaded on Windows you should set `ENV_BACKEND_EXECUTABLE=<path to micromamba executable>/micromamba.exe`. After that you should be able to run the tests with:
 
 ```console
 pytest -vv
