@@ -1,5 +1,24 @@
 # History of changes
 
+## Version 0.1.1 (2022-12-08)
+
+### Issues Closed
+
+* [Issue 13](https://github.com/spyder-ide/envs-manager/issues/13) - Add util function to manage `subprocess.run` calls between backends ([PR 23](https://github.com/spyder-ide/envs-manager/pull/23) by [@dalthviz](https://github.com/dalthviz))
+
+In this release 1 issue was closed.
+
+### Pull Requests Merged
+
+* [PR 23](https://github.com/spyder-ide/envs-manager/pull/23) - PR: Refactor use of `subprocess.run`, by [@dalthviz](https://github.com/dalthviz) ([13](https://github.com/spyder-ide/envs-manager/issues/13))
+* [PR 22](https://github.com/spyder-ide/envs-manager/pull/22) - PR: Add missing return and force kwarg to methods, by [@dalthviz](https://github.com/dalthviz)
+
+In this release 2 pull requests were closed.
+
+
+----
+
+
 ## Version 0.1.0 (2022-11-22)
 
 ### Issues Closed

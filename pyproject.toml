@@ -4,12 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "envs-manager"
-description = ''
+description = 'A manager for Python environments and packages managers'
 readme = "README.md"
 requires-python = ">=3.7"
-license = "MIT"
+license = { text = "MIT" }
 keywords = []
 authors = [
+  { name = "Spyder Development Team and envs-manager contributors" },
   { name = "Spyder Development Team and envs-manager contributors", email = "spyder.python@gmail.com" },
 ]
 classifiers = [
