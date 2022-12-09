@@ -67,9 +67,9 @@ pip install -e .
 pre-commit install
 ```
 
-* To run the test:
+* To run the test suite:
 
-You will need to setup the `ENV_BACKEND_EXECUTABLE` environmental variable in order to use a `conda-like` manager. The environmental variable should point to a conda or mamba executable. For example, if you have micromamba downloaded on Windows you should set `ENV_BACKEND_EXECUTABLE=<path to micromamba executable>/micromamba.exe`. After that you should be able to run the tests with:
+You will need to setup the `ENV_BACKEND_EXECUTABLE` environmental variable in order to use a `conda-like` manager. This environment variable should point to a conda or mamba executable. For example, if you have micromamba downloaded on Windows you should set `ENV_BACKEND_EXECUTABLE=<path to micromamba executable>/micromamba.exe`. After that you should be able to run our tests with:
 
 ```console
 pytest -vv
