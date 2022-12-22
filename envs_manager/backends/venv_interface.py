@@ -173,3 +173,21 @@ class VEnvInterface(EnvManagerInstance):
 
         print(result.stdout)
         return formatted_list
+
+    @classmethod
+    def list_environments(cls, root_path, external_executable=None):
+        envs_directory = Path(root_path) / cls.ID / "envs"
+        environments = {}
+        first_environment = True
+        print(f"# {cls.ID} environments")
+        envs_directory.mkdir(parents=True, exist_ok=True)
+        for env_dir in envs_directory.iterdir():
+            if env_dir.is_dir():
+                if first_environment:
+                    first_environment = False
+                environments[env_dir.name] = str(env_dir)
+                print(f"{env_dir.name} - {str(env_dir)}")
+        else:
+            if first_environment:
+                print(f"No environments found for {cls.ID} in {root_path}")
+        return environments
