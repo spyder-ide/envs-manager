@@ -184,6 +184,8 @@ def main(args=None):
             manager.list()
     if options.command == "list-environments":
         if options.backend:
-            Manager.list_environments(backend=options.backend)
+            Manager.list_environments(
+                backend=options.backend, external_executable=EXTERNAL_EXECUTABLE
+            )
         else:
-            Manager.list_environments()
+            Manager.list_environments(external_executable=EXTERNAL_EXECUTABLE)

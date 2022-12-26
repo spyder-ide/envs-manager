@@ -87,3 +87,7 @@ class EnvManagerInstance:
 
     def list_packages(self):
         raise NotImplementedError()
+
+    @classmethod
+    def list_environments(cls, root_path, external_executable=None):
+        raise NotImplementedError()

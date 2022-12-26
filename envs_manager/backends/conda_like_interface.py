@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
-import shutil
+import json
+from pathlib import Path
 import subprocess
 
 import yaml
@@ -70,7 +71,6 @@ class CondaLikeInterface(EnvManagerInstance):
         try:
             result = run_command(command, capture_output=True)
             print(result.stdout)
-            shutil.rmtree(self.environment_path, ignore_errors=True)
             return (True, result)
         except Exception as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -242,3 +242,24 @@ class CondaLikeInterface(EnvManagerInstance):
 
         print(result.stdout)
         return formatted_list
+
+    @classmethod
+    def list_environments(cls, root_path, external_executable=None):
+        if not external_executable:
+            raise Exception(f"Missing path to external executable for {cls.ID} backend")
+        envs_directory = Path(root_path) / cls.ID / "envs"
+        environments = {}
+        envs_directory.mkdir(parents=True, exist_ok=True)
+        command = [external_executable, "env", "list", "--json"]
+        try:
+            result = run_command(command, capture_output=True)
+            print(result.stdout)
+            result_json = json.loads(result.stdout)
+            for env_dir in result_json["envs"]:
+                env_dir_path = Path(env_dir)
+                if envs_directory in env_dir_path.parents:
+                    environments[env_dir_path.name] = str(env_dir_path)
+            return (environments, result)
+        except subprocess.CalledProcessError as error:
+            formatted_error = f"{error.returncode}: {error.stderr}"
+            return (environments, formatted_error)

@@ -103,22 +103,13 @@ class Manager:
     def list(self):
         return self.backend_instance.list_packages()
 
-    @staticmethod
+    @classmethod
     def list_environments(
-        backend=DEFAULT_BACKEND, root_path=DEFAULT_BACKENDS_ROOT_PATH
+        cls,
+        backend=DEFAULT_BACKEND,
+        root_path=DEFAULT_BACKENDS_ROOT_PATH,
+        external_executable=None,
     ):
-        envs_directory = Path(root_path) / backend / "envs"
-        environments = {}
-        first_environment = True
-        print(f"# {backend} environments")
-        envs_directory.mkdir(parents=True, exist_ok=True)
-        for env_dir in envs_directory.iterdir():
-            if env_dir.is_dir():
-                if first_environment:
-                    first_environment = False
-                environments[env_dir.name] = str(env_dir)
-                print(f"{env_dir.name} - {str(env_dir)}")
-        else:
-            if first_environment:
-                print(f"No environments found for {backend} in {root_path}")
-        return environments
+        return cls.BACKENDS[backend].list_environments(
+            root_path, external_executable=external_executable
+        )
