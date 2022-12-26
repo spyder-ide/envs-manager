@@ -245,6 +245,8 @@ class CondaLikeInterface(EnvManagerInstance):
 
     @classmethod
     def list_environments(cls, root_path, external_executable=None):
+        if not external_executable:
+            raise Exception(f"Missing path to external executable for {cls.ID} backend")
         envs_directory = Path(root_path) / cls.ID / "envs"
         environments = {}
         envs_directory.mkdir(parents=True, exist_ok=True)
