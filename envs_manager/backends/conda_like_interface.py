@@ -253,6 +253,7 @@ class CondaLikeInterface(EnvManagerInstance):
         command = [external_executable, "env", "list", "--json"]
         try:
             result = run_command(command, capture_output=True)
+            print(result.stdout)
             result_json = json.loads(result.stdout)
             for env_dir in result_json["envs"]:
                 env_dir_path = Path(env_dir)
