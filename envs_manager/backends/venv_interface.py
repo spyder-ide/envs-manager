@@ -152,7 +152,7 @@ class VEnvInterface(EnvManagerInstance):
         result = self._run_command(command)
         result_lines = result.stdout.split("\n")
 
-        formatted_packages = {}
+        formatted_packages = []
         formatted_list = dict(
             environment=self.environment_path, packages=formatted_packages
         )
@@ -169,10 +169,10 @@ class VEnvInterface(EnvManagerInstance):
                 description=package_description,
                 requested=True,
             )
-            formatted_packages[package_name] = formatted_package
+            formatted_packages.append(formatted_package)
 
         print(result.stdout)
-        return formatted_list
+        return (True, formatted_list)
 
     @classmethod
     def list_environments(cls, root_path, external_executable=None):

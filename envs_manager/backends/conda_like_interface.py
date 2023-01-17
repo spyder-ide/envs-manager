@@ -213,7 +213,7 @@ class CondaLikeInterface(EnvManagerInstance):
             skip_lines = 4
         else:
             skip_lines = 3
-        formatted_packages = {}
+        formatted_packages = []
         formatted_list = dict(
             environment=self.environment_path, packages=formatted_packages
         )
@@ -238,10 +238,10 @@ class CondaLikeInterface(EnvManagerInstance):
                 description=package_description,
                 requested=package_requested,
             )
-            formatted_packages[package_name] = formatted_package
+            formatted_packages.append(formatted_package)
 
         print(result.stdout)
-        return formatted_list
+        return (True, formatted_list)
 
     @classmethod
     def list_environments(cls, root_path, external_executable=None):
