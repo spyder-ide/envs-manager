@@ -54,7 +54,11 @@ BACKENDS = [
         (
             ["libmamba Could not solve for environment specs", "PackagesNotFoundError"],
             ["All requested packages already installed", "PackageNotInstalledError"],
-            ["Nothing to do", "PackagesNotFoundError"],
+            [
+                "Nothing to do",
+                "Failure: packages to remove not found in the environment",
+                "PackagesNotFoundError",
+            ],
         ),
         # Key returned by list call, Number of packages returned, Number of properties returned per package, Package description
         [2, 1, 6, "General purpose programming language"],
@@ -68,7 +72,11 @@ BACKENDS = [
         (
             ["libmamba Could not solve for environment specs", "PackagesNotFoundError"],
             ["All requested packages already installed", "PackageNotInstalledError"],
-            ["Nothing to do", "PackagesNotFoundError"],
+            [
+                "Nothing to do",
+                "Failure: packages to remove not found in the environment",
+                "PackagesNotFoundError",
+            ],
         ),
         # Number of keys returned by list call, Number of packages returned, Number of properties returned per package, Package description
         [2, 1, 6, "General purpose programming language"],
