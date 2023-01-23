@@ -206,6 +206,9 @@ class CondaLikeInterface(EnvManagerInstance):
             packages_requested = yaml.load(
                 export_env_data.stdout, Loader=yaml.FullLoader
             )["dependencies"]
+            packages_requested = [
+                package.split("[")[0].split("=")[0] for package in packages_requested
+            ]
         else:
             packages_requested = []
 

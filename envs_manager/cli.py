@@ -152,7 +152,6 @@ def main(args=None):
     print(f"Using BACKENDS_ROOT_PATH: {DEFAULT_BACKENDS_ROOT_PATH}")
     print(f"Using ENV_BACKEND: {options.backend}")
     print(f"Using ENV_BACKEND_EXECUTABLE: {EXTERNAL_EXECUTABLE}")
-    print(f"Default root path to environments: {DEFAULT_ENVS_ROOT_PATH}")
     if options.env_name:
         manager = Manager(
             backend=options.backend,
