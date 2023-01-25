@@ -2,8 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-# Standard library imports
 import subprocess
+
+import requests
+
+PYPI_API_PACKAGE_INFO_URL = "https://pypi.org/pypi/{package_name}/json"
+ANACONDA_API_PACKAGE_INFO = "https://api.anaconda.org/package/{channel}/{package_name}"
 
 
 def run_command(command, capture_output=True, run_env=None):
@@ -48,6 +52,18 @@ class EnvManagerInstance:
         self.external_executable = external_executable
         self.executable_variant = None
         assert self.validate(), f"{self.ID} backend unavailable!"
+
+    def _get_package_info(self, package_name, channel=None):
+        package_info_url = PYPI_API_PACKAGE_INFO_URL.format(package_name=package_name)
+        package_info = requests.get(package_info_url).json()
+        if "message" in package_info and channel:
+            package_info_url = ANACONDA_API_PACKAGE_INFO.format(
+                channel=channel, package_name=package_name
+            )
+            package_info = {"info": requests.get(package_info_url).json()}
+        elif "message" in package_info:
+            package_info = None
+        return package_info
 
     def validate(self):
         pass

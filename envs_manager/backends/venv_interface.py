@@ -7,11 +7,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-import requests
-
 from envs_manager.api import EnvManagerInstance, run_command
-
-PYPI_API_PACKAGE_INFO_URL = "https://pypi.org/pypi/{package_name}/json"
 
 
 class VEnvInterface(EnvManagerInstance):
@@ -22,11 +18,6 @@ class VEnvInterface(EnvManagerInstance):
         run_env["PIP_REQUIRE_VIRTUALENV"] = "true"
         result = run_command(command, capture_output=capture_output, run_env=run_env)
         return result
-
-    def _get_package_info(self, package_name):
-        package_info_url = PYPI_API_PACKAGE_INFO_URL.format(package_name=package_name)
-        package_info = requests.get(package_info_url).json()
-        return package_info
 
     @property
     def executable_path(self):
