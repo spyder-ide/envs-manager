@@ -7,7 +7,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from envs_manager.api import EnvManagerInstance, run_command
+from envs_manager.api import EnvManagerInstance, run_command, get_package_info
 
 
 class VEnvInterface(EnvManagerInstance):
@@ -149,9 +149,7 @@ class VEnvInterface(EnvManagerInstance):
         )
         for package in result_lines[2:-1]:
             package_name, package_version = package.split()
-            package_description = self._get_package_info(package_name)["info"][
-                "summary"
-            ]
+            package_description = get_package_info(package_name)["info"]["summary"]
             formatted_package = dict(
                 name=package_name,
                 version=package_version,

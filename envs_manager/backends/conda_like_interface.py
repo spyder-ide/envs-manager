@@ -9,7 +9,7 @@ import subprocess
 import yaml
 import requests
 
-from envs_manager.api import EnvManagerInstance, run_command
+from envs_manager.api import EnvManagerInstance, run_command, get_package_info
 
 MICROMAMBA_VARIANT = "micromamba"
 CONDA_VARIANT = "conda"
@@ -216,9 +216,7 @@ class CondaLikeInterface(EnvManagerInstance):
             package_name = package_info[0]
             package_build = None if len(package_info) <= 2 else package_info[2]
             package_channel = None if len(package_info) <= 3 else package_info[3]
-            package_full_info = self._get_package_info(
-                package_name, channel=package_channel
-            )
+            package_full_info = get_package_info(package_name, channel=package_channel)
             package_description = (
                 package_full_info["info"]["summary"] if package_full_info else None
             )

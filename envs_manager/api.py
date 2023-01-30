@@ -44,6 +44,41 @@ def run_command(command, capture_output=True, run_env=None):
     return result
 
 
+def get_package_info(package_name, channel=None):
+    """
+    Get package information from the PyPI JSON API and fallback to the
+    Anaconda package info API endpoint if needed and a channel is provided.
+
+    Parameters
+    ----------
+    package_name : str
+        Package name to query.
+    channel : str, optional
+        In case of fallback to the Anaconda endpoint check package info for
+        the given package channel. The default is None.
+
+    Returns
+    -------
+    package_info : dict
+        Information about the package (metadata like summary).
+
+    """
+    package_info_url = PYPI_API_PACKAGE_INFO_URL.format(package_name=package_name)
+    package_info = requests.get(package_info_url).json()
+    # Here the `message` key is checked since the PyPI JSON API endpoint returns
+    # `{"message": "Not Found"}` in case a package was not found.
+    # The fallback to the Ananconda API package info endpoint is only done if a `channel` is provided
+    # Without a channel the Anaconda endpoint can't be used.
+    if "message" in package_info and channel:
+        package_info_url = ANACONDA_API_PACKAGE_INFO.format(
+            channel=channel, package_name=package_name
+        )
+        package_info = {"info": requests.get(package_info_url).json()}
+    elif "message" in package_info:
+        package_info = None
+    return package_info
+
+
 class EnvManagerInstance:
     ID = ""
 
@@ -52,18 +87,6 @@ class EnvManagerInstance:
         self.external_executable = external_executable
         self.executable_variant = None
         assert self.validate(), f"{self.ID} backend unavailable!"
-
-    def _get_package_info(self, package_name, channel=None):
-        package_info_url = PYPI_API_PACKAGE_INFO_URL.format(package_name=package_name)
-        package_info = requests.get(package_info_url).json()
-        if "message" in package_info and channel:
-            package_info_url = ANACONDA_API_PACKAGE_INFO.format(
-                channel=channel, package_name=package_name
-            )
-            package_info = {"info": requests.get(package_info_url).json()}
-        elif "message" in package_info:
-            package_info = None
-        return package_info
 
     def validate(self):
         pass
