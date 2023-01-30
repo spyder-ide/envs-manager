@@ -60,11 +60,11 @@ def get_package_info(package_name, channel=None):
     Returns
     -------
     package_info : dict
-        Information about the package (metadata like summary).
-
+        Information about the package (e.g. metadata like its summary).
     """
     package_info_url = PYPI_API_PACKAGE_INFO_URL.format(package_name=package_name)
     package_info = requests.get(package_info_url).json()
+
     # Here the `message` key is checked since the PyPI JSON API endpoint returns
     # `{"message": "Not Found"}` in case a package was not found.
     # The fallback to the Ananconda API package info endpoint is only done if a `channel` is provided
