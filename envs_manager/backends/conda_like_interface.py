@@ -157,7 +157,7 @@ class CondaLikeInterface(EnvManagerInstance):
             self.environment_path,
         ] + packages
         if force:
-            command + ["-y"]
+            command += ["-y"]
         try:
             result = run_command(command, capture_output=capture_output)
             return (True, result)
@@ -175,7 +175,7 @@ class CondaLikeInterface(EnvManagerInstance):
             self.environment_path,
         ] + packages
         if force:
-            command + ["-y"]
+            command += ["-y"]
         try:
             result = run_command(command, capture_output=capture_output)
             if capture_output:
