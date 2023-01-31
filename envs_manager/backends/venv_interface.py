@@ -7,11 +7,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-import requests
-
-from envs_manager.api import EnvManagerInstance, run_command
-
-PYPI_API_PACKAGE_INFO_URL = "https://pypi.org/pypi/{package_name}/json"
+from envs_manager.api import EnvManagerInstance, run_command, get_package_info
 
 
 class VEnvInterface(EnvManagerInstance):
@@ -22,11 +18,6 @@ class VEnvInterface(EnvManagerInstance):
         run_env["PIP_REQUIRE_VIRTUALENV"] = "true"
         result = run_command(command, capture_output=capture_output, run_env=run_env)
         return result
-
-    def _get_package_info(self, package_name):
-        package_info_url = PYPI_API_PACKAGE_INFO_URL.format(package_name=package_name)
-        package_info = requests.get(package_info_url).json()
-        return package_info
 
     @property
     def executable_path(self):
@@ -152,15 +143,13 @@ class VEnvInterface(EnvManagerInstance):
         result = self._run_command(command)
         result_lines = result.stdout.split("\n")
 
-        formatted_packages = {}
+        formatted_packages = []
         formatted_list = dict(
             environment=self.environment_path, packages=formatted_packages
         )
         for package in result_lines[2:-1]:
             package_name, package_version = package.split()
-            package_description = self._get_package_info(package_name)["info"][
-                "summary"
-            ]
+            package_description = get_package_info(package_name)["info"]["summary"]
             formatted_package = dict(
                 name=package_name,
                 version=package_version,
@@ -169,10 +158,10 @@ class VEnvInterface(EnvManagerInstance):
                 description=package_description,
                 requested=True,
             )
-            formatted_packages[package_name] = formatted_package
+            formatted_packages.append(formatted_package)
 
         print(result.stdout)
-        return formatted_list
+        return (True, formatted_list)
 
     @classmethod
     def list_environments(cls, root_path, external_executable=None):

@@ -9,24 +9,14 @@ import subprocess
 import yaml
 import requests
 
-from envs_manager.api import EnvManagerInstance, run_command
+from envs_manager.api import EnvManagerInstance, run_command, get_package_info
 
 MICROMAMBA_VARIANT = "micromamba"
 CONDA_VARIANT = "conda"
-ANACONDA_API_PACKAGE_INFO = "https://api.anaconda.org/package/{channel}/{package_name}"
 
 
 class CondaLikeInterface(EnvManagerInstance):
     ID = "conda-like"
-
-    def _get_package_info(self, package_name, channel):
-        if not channel:
-            channel = "anaconda"
-        package_info_url = ANACONDA_API_PACKAGE_INFO.format(
-            channel=channel, package_name=package_name
-        )
-        package_info = requests.get(package_info_url).json()
-        return package_info
 
     def validate(self):
         if self.external_executable:
@@ -167,7 +157,7 @@ class CondaLikeInterface(EnvManagerInstance):
             self.environment_path,
         ] + packages
         if force:
-            command + ["-y"]
+            command += ["-y"]
         try:
             result = run_command(command, capture_output=capture_output)
             return (True, result)
@@ -185,7 +175,7 @@ class CondaLikeInterface(EnvManagerInstance):
             self.environment_path,
         ] + packages
         if force:
-            command + ["-y"]
+            command += ["-y"]
         try:
             result = run_command(command, capture_output=capture_output)
             if capture_output:
@@ -206,6 +196,9 @@ class CondaLikeInterface(EnvManagerInstance):
             packages_requested = yaml.load(
                 export_env_data.stdout, Loader=yaml.FullLoader
             )["dependencies"]
+            packages_requested = [
+                package.split("[")[0].split("=")[0] for package in packages_requested
+            ]
         else:
             packages_requested = []
 
@@ -213,7 +206,7 @@ class CondaLikeInterface(EnvManagerInstance):
             skip_lines = 4
         else:
             skip_lines = 3
-        formatted_packages = {}
+        formatted_packages = []
         formatted_list = dict(
             environment=self.environment_path, packages=formatted_packages
         )
@@ -223,12 +216,10 @@ class CondaLikeInterface(EnvManagerInstance):
             package_name = package_info[0]
             package_build = None if len(package_info) <= 2 else package_info[2]
             package_channel = None if len(package_info) <= 3 else package_info[3]
-            if package_channel:
-                package_description = self._get_package_info(
-                    package_name, channel=package_channel
-                )["summary"]
-            else:
-                package_description = None
+            package_full_info = get_package_info(package_name, channel=package_channel)
+            package_description = (
+                package_full_info["info"]["summary"] if package_full_info else None
+            )
             package_requested = package_name in packages_requested
             formatted_package = dict(
                 name=package_name,
@@ -238,10 +229,10 @@ class CondaLikeInterface(EnvManagerInstance):
                 description=package_description,
                 requested=package_requested,
             )
-            formatted_packages[package_name] = formatted_package
+            formatted_packages.append(formatted_package)
 
         print(result.stdout)
-        return formatted_list
+        return (True, formatted_list)
 
     @classmethod
     def list_environments(cls, root_path, external_executable=None):

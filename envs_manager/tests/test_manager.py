@@ -54,7 +54,11 @@ BACKENDS = [
         (
             ["libmamba Could not solve for environment specs", "PackagesNotFoundError"],
             ["All requested packages already installed", "PackageNotInstalledError"],
-            ["Nothing to do", "PackagesNotFoundError"],
+            [
+                "Nothing to do",
+                "Failure: packages to remove not found in the environment",
+                "PackagesNotFoundError",
+            ],
         ),
         # Key returned by list call, Number of packages returned, Number of properties returned per package, Package description
         [2, 1, 6, "General purpose programming language"],
@@ -68,7 +72,11 @@ BACKENDS = [
         (
             ["libmamba Could not solve for environment specs", "PackagesNotFoundError"],
             ["All requested packages already installed", "PackageNotInstalledError"],
-            ["Nothing to do", "PackagesNotFoundError"],
+            [
+                "Nothing to do",
+                "Failure: packages to remove not found in the environment",
+                "PackagesNotFoundError",
+            ],
         ),
         # Number of keys returned by list call, Number of packages returned, Number of properties returned per package, Package description
         [2, 1, 6, "General purpose programming language"],
@@ -123,23 +131,28 @@ def wait_until(condition, interval=0.1, timeout=1, **kwargs):
 
 
 def package_installed(manager_instance, installed_packages):
-    package_list = manager_instance.list()
+    list_result, package_list = manager_instance.list()
+    assert list_result
     for package in installed_packages:
-        return package.split("=")[0] in package_list["packages"]
+        packages_names = [package["name"] for package in package_list["packages"]]
+        return package.split("=")[0] in packages_names
 
 
 def packages_uninstalled(manager_instance, installed_packages):
-    package_list = manager_instance.list()
+    list_result, package_list = manager_instance.list()
+    assert list_result
     for package in installed_packages:
-        return package not in package_list["packages"]
+        packages_names = [package["name"] for package in package_list["packages"]]
+        return package not in packages_names
 
 
 def check_packages(manager_instance, package, version):
-    packages_list = manager_instance.list()
-    return (
-        package in packages_list["packages"]
-        and packages_list["packages"][package]["version"] == version
-    )
+    list_result, packages_list = manager_instance.list()
+    assert list_result
+    packages_info = [
+        (package["name"], package["version"]) for package in packages_list["packages"]
+    ]
+    return (package, version) in packages_info
 
 
 @pytest.fixture
@@ -193,8 +206,13 @@ def test_manager_backends(
     assert create_result
 
     # List packages and check correct list result dimensions
-    initial_list = manager_instance.list()
-    assert initial_package in initial_list["packages"]
+    list_result, initial_list = manager_instance.list()
+    assert list_result
+    package_info = None
+    for package in initial_list["packages"]:
+        if package["name"] == initial_package:
+            package_info = package
+    assert package_info
     (
         list_info_number,
         package_number,
@@ -203,10 +221,8 @@ def test_manager_backends(
     ) = list_info
     assert len(initial_list) == list_info_number
     assert len(initial_list["packages"]) > package_number
-    assert len(initial_list["packages"][initial_package]) == package_info_number
-    assert (
-        initial_list["packages"][initial_package]["description"] == package_description
-    )
+    assert len(package_info) == package_info_number
+    assert package_info["description"] == package_description
 
     # Install a new package in the created environment
     with capsys.disabled():

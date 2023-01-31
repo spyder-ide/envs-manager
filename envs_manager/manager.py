@@ -88,7 +88,9 @@ class Manager:
                 capture_output=capture_output,
             )
         else:
-            return self.backend_instance.install_packages(packages, force=force)
+            return self.backend_instance.install_packages(
+                packages, force=force, capture_output=capture_output
+            )
 
     def uninstall(self, packages, force=False, capture_output=False):
         return self.backend_instance.uninstall_packages(
