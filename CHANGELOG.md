@@ -1,5 +1,19 @@
 # History of changes
 
+## Version 0.1.2 (2023-01-31)
+
+### Pull Requests Merged
+
+* [PR 26](https://github.com/spyder-ide/envs-manager/pull/26) - PR: Changes to environment packages listing and fix testing with micromamba 1.x, by [@dalthviz](https://github.com/dalthviz)
+* [PR 25](https://github.com/spyder-ide/envs-manager/pull/25) - PR: Add list environments functionality per backend and don't remove env folder when deleting for conda-like backend, by [@dalthviz](https://github.com/dalthviz)
+* [PR 24](https://github.com/spyder-ide/envs-manager/pull/24) - PR: Update README, by [@dalthviz](https://github.com/dalthviz)
+
+In this release 3 pull requests were closed.
+
+
+----
+
+
 ## Version 0.1.1 (2022-12-08)
 
 ### Issues Closed
