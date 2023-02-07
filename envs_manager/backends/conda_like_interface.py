@@ -3,16 +3,19 @@
 # SPDX-License-Identifier: MIT
 
 import json
+import logging
 from pathlib import Path
 import subprocess
 
 import yaml
-import requests
 
 from envs_manager.api import EnvManagerInstance, run_command, get_package_info
 
 MICROMAMBA_VARIANT = "micromamba"
 CONDA_VARIANT = "conda"
+
+
+logger = logging.getLogger("envs-manager")
 
 
 class CondaLikeInterface(EnvManagerInstance):
@@ -30,7 +33,7 @@ class CondaLikeInterface(EnvManagerInstance):
                     self.executable_variant = version[0]
                 return True
             except Exception as error:
-                print(error.stderr)
+                logger.error(error.stderr)
         return False
 
     def create_environment(self, packages=[], channels=["conda-forge"], force=False):
@@ -43,7 +46,7 @@ class CondaLikeInterface(EnvManagerInstance):
             command += ["-y"]
         try:
             result = run_command(command, capture_output=True)
-            print(result.stdout)
+            logger.info(result.stdout)
             return (True, result)
         except Exception as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -60,7 +63,7 @@ class CondaLikeInterface(EnvManagerInstance):
             command += ["-y"]
         try:
             result = run_command(command, capture_output=True)
-            print(result.stdout)
+            logger.info(result.stdout)
             return (True, result)
         except Exception as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -85,7 +88,7 @@ class CondaLikeInterface(EnvManagerInstance):
             if export_file_path:
                 with open(export_file_path, "w") as exported_file:
                     exported_file.write(result.stdout)
-                print(result.stdout)
+                logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -114,7 +117,7 @@ class CondaLikeInterface(EnvManagerInstance):
                 command += ["--force"]
         try:
             result = run_command(command, capture_output=True)
-            print(result.stdout)
+            logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (
@@ -231,7 +234,7 @@ class CondaLikeInterface(EnvManagerInstance):
             )
             formatted_packages.append(formatted_package)
 
-        print(result.stdout)
+        logger.info(result.stdout)
         return (True, formatted_list)
 
     @classmethod
@@ -240,17 +243,26 @@ class CondaLikeInterface(EnvManagerInstance):
             raise Exception(f"Missing path to external executable for {cls.ID} backend")
         envs_directory = Path(root_path) / cls.ID / "envs"
         environments = {}
+        first_environment = True
         envs_directory.mkdir(parents=True, exist_ok=True)
         command = [external_executable, "env", "list", "--json"]
         try:
             result = run_command(command, capture_output=True)
-            print(result.stdout)
+            logger.debug(result.stdout)
             result_json = json.loads(result.stdout)
+            logger.info(f"# {cls.ID} environments")
             for env_dir in result_json["envs"]:
                 env_dir_path = Path(env_dir)
                 if envs_directory in env_dir_path.parents:
+                    if first_environment:
+                        first_environment = False
                     environments[env_dir_path.name] = str(env_dir_path)
+                    logger.info(f"{env_dir_path.name} - {str(env_dir_path)}")
+            else:
+                if first_environment:
+                    logger.info(f"No environments found for {cls.ID} in {root_path}")
             return (environments, result)
         except subprocess.CalledProcessError as error:
             formatted_error = f"{error.returncode}: {error.stderr}"
+            logger.error(formatted_error)
             return (environments, formatted_error)

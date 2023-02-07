@@ -2,12 +2,16 @@
 #
 # SPDX-License-Identifier: MIT
 
+import logging
 import os
 import shutil
 import subprocess
 from pathlib import Path
 
 from envs_manager.api import EnvManagerInstance, run_command, get_package_info
+
+
+logger = logging.getLogger("envs-manager")
 
 
 class VEnvInterface(EnvManagerInstance):
@@ -113,7 +117,7 @@ class VEnvInterface(EnvManagerInstance):
         try:
             command = [self.executable_path, "-m", "pip", "install"] + packages
             result = self._run_command(command, capture_output=capture_output)
-            print(result.stdout)
+            logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -160,7 +164,7 @@ class VEnvInterface(EnvManagerInstance):
             )
             formatted_packages.append(formatted_package)
 
-        print(result.stdout)
+        logger.info(result.stdout)
         return (True, formatted_list)
 
     @classmethod
@@ -168,15 +172,15 @@ class VEnvInterface(EnvManagerInstance):
         envs_directory = Path(root_path) / cls.ID / "envs"
         environments = {}
         first_environment = True
-        print(f"# {cls.ID} environments")
+        logger.info(f"# {cls.ID} environments")
         envs_directory.mkdir(parents=True, exist_ok=True)
         for env_dir in envs_directory.iterdir():
             if env_dir.is_dir():
                 if first_environment:
                     first_environment = False
                 environments[env_dir.name] = str(env_dir)
-                print(f"{env_dir.name} - {str(env_dir)}")
+                logger.info(f"{env_dir.name} - {str(env_dir)}")
         else:
             if first_environment:
-                print(f"No environments found for {cls.ID} in {root_path}")
+                logger.info(f"No environments found for {cls.ID} in {root_path}")
         return environments

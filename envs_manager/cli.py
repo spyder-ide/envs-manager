@@ -3,13 +3,11 @@
 # SPDX-License-Identifier: MIT
 
 import argparse
-import os
-from pathlib import Path
+import logging
 
 from envs_manager.manager import (
     DEFAULT_BACKENDS_ROOT_PATH,
     DEFAULT_BACKEND,
-    DEFAULT_ENVS_ROOT_PATH,
     EXTERNAL_EXECUTABLE,
     Manager,
 )
@@ -40,6 +38,14 @@ def main(args=None):
         "--env_name",
         help="The name of a directory where the virtual environment is or will be locate."
         "The environment is/will be located at <BACKENDS_ROOT_PATH>/<ENV_BACKEND>/envs/<env name>.",
+    )
+
+    parser.add_argument(
+        "-ll",
+        "--logging_level",
+        type=int,
+        default=logging.INFO,
+        help="The level of the logging to use.",
     )
 
     main_subparser = parser.add_subparsers(title="commands", dest="command")
@@ -148,10 +154,15 @@ def main(args=None):
     )
 
     options = parser.parse_args(args)
-    print(options)
-    print(f"Using BACKENDS_ROOT_PATH: {DEFAULT_BACKENDS_ROOT_PATH}")
-    print(f"Using ENV_BACKEND: {options.backend}")
-    print(f"Using ENV_BACKEND_EXECUTABLE: {EXTERNAL_EXECUTABLE}")
+
+    # Setup logging
+    logging.basicConfig(level=options.logging_level, format="%(message)s")
+    logger = logging.getLogger("envs-manager")
+
+    logger.debug(options)
+    logger.debug(f"Using BACKENDS_ROOT_PATH: {DEFAULT_BACKENDS_ROOT_PATH}")
+    logger.debug(f"Using ENV_BACKEND: {options.backend}")
+    logger.debug(f"Using ENV_BACKEND_EXECUTABLE: {EXTERNAL_EXECUTABLE}")
     if options.env_name:
         manager = Manager(
             backend=options.backend,
