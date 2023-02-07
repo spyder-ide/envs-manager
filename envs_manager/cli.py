@@ -4,6 +4,7 @@
 
 import argparse
 import logging
+import sys
 
 from envs_manager.manager import (
     DEFAULT_BACKENDS_ROOT_PATH,
@@ -156,7 +157,11 @@ def main(args=None):
     options = parser.parse_args(args)
 
     # Setup logging
-    logging.basicConfig(level=options.logging_level, format="%(message)s")
+    logging.basicConfig(
+        level=options.logging_level,
+        format="%(message)s",
+        handlers=[logging.StreamHandler(stream=sys.stdout)],
+    )
     logger = logging.getLogger("envs-manager")
 
     logger.debug(options)

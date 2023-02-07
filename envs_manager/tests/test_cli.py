@@ -74,7 +74,6 @@ def test_cli(tmp_path, backend):
             [
                 "envs-manager",
                 f"-b={backend_value}",
-                f"-en=test_create",
                 "list-environments",
             ]
         ),

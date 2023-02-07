@@ -250,6 +250,7 @@ class CondaLikeInterface(EnvManagerInstance):
             result = run_command(command, capture_output=True)
             logger.debug(result.stdout)
             result_json = json.loads(result.stdout)
+            logger.debug(result_json)
             logger.info(f"# {cls.ID} environments")
             for env_dir in result_json["envs"]:
                 env_dir_path = Path(env_dir)
@@ -260,7 +261,9 @@ class CondaLikeInterface(EnvManagerInstance):
                     logger.info(f"{env_dir_path.name} - {str(env_dir_path)}")
             else:
                 if first_environment:
-                    logger.info(f"No environments found for {cls.ID} in {root_path}")
+                    logger.info(
+                        f"No environments found for {cls.ID} in {envs_directory}"
+                    )
             return (environments, result)
         except subprocess.CalledProcessError as error:
             formatted_error = f"{error.returncode}: {error.stderr}"
