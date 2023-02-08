@@ -243,7 +243,7 @@ class CondaLikeInterface(EnvManagerInstance):
             raise Exception(f"Missing path to external executable for {cls.ID} backend")
         envs_directory = Path(root_path) / cls.ID / "envs"
         environments = {}
-        first_environment = True
+        first_environment = False
         envs_directory.mkdir(parents=True, exist_ok=True)
         command = [external_executable, "env", "list", "--json"]
         try:
@@ -255,15 +255,12 @@ class CondaLikeInterface(EnvManagerInstance):
             for env_dir in result_json["envs"]:
                 env_dir_path = Path(env_dir)
                 if envs_directory in env_dir_path.parents:
-                    if first_environment:
-                        first_environment = False
+                    if not first_environment:
+                        first_environment = True
                     environments[env_dir_path.name] = str(env_dir_path)
                     logger.info(f"{env_dir_path.name} - {str(env_dir_path)}")
-            else:
-                if first_environment:
-                    logger.info(
-                        f"No environments found for {cls.ID} in {envs_directory}"
-                    )
+            if not first_environment:
+                logger.info(f"No environments found for {cls.ID} in {envs_directory}")
             return (environments, result)
         except subprocess.CalledProcessError as error:
             formatted_error = f"{error.returncode}: {error.stderr}"
