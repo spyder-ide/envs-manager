@@ -36,7 +36,7 @@ def main(args=None):
     )
     parser.add_argument(
         "-en",
-        "--env_name",
+        "--env-name",
         help="The name of a directory where the virtual environment is or will be locate."
         "The environment is/will be located at <BACKENDS_ROOT_PATH>/<ENV_BACKEND>/envs/<env name>.",
     )

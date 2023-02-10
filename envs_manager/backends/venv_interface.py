@@ -87,6 +87,7 @@ class VEnvInterface(EnvManagerInstance):
             if export_file_path:
                 with open(export_file_path, "w") as exported_file:
                     exported_file.write(result.stdout)
+            logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -103,6 +104,7 @@ class VEnvInterface(EnvManagerInstance):
                 import_file_path,
             ]
             result = self._run_command(command)
+            logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -117,7 +119,8 @@ class VEnvInterface(EnvManagerInstance):
         try:
             command = [self.executable_path, "-m", "pip", "install"] + packages
             result = self._run_command(command, capture_output=capture_output)
-            logger.info(result.stdout)
+            if capture_output:
+                logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -129,6 +132,8 @@ class VEnvInterface(EnvManagerInstance):
                 command += ["-y"]
             command += packages
             result = self._run_command(command, capture_output=capture_output)
+            if capture_output:
+                logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -138,6 +143,8 @@ class VEnvInterface(EnvManagerInstance):
             command = [self.executable_path, "-m", "pip", "install", "-U"]
             command += packages
             result = self._run_command(command, capture_output=capture_output)
+            if capture_output:
+                logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")

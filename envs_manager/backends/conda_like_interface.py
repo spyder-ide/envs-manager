@@ -88,7 +88,7 @@ class CondaLikeInterface(EnvManagerInstance):
             if export_file_path:
                 with open(export_file_path, "w") as exported_file:
                     exported_file.write(result.stdout)
-                logger.info(result.stdout)
+            logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -147,6 +147,8 @@ class CondaLikeInterface(EnvManagerInstance):
             command += channels
         try:
             result = run_command(command, capture_output=capture_output)
+            if capture_output:
+                logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             formatted_error = f"{error.returncode}: {error.stderr}"
@@ -163,6 +165,8 @@ class CondaLikeInterface(EnvManagerInstance):
             command += ["-y"]
         try:
             result = run_command(command, capture_output=capture_output)
+            if capture_output:
+                logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             if "PackagesNotFoundError" in error.stderr:
@@ -182,8 +186,11 @@ class CondaLikeInterface(EnvManagerInstance):
         try:
             result = run_command(command, capture_output=capture_output)
             if capture_output:
+                logger.info(result.stdout)
                 if "All requested packages already installed" in result.stdout:
                     return (False, result.stdout)
+                else:
+                    return (True, result.stdout)
             else:
                 return (True, result)
         except subprocess.CalledProcessError as error:
