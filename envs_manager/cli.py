@@ -43,10 +43,10 @@ def main(args=None):
 
     parser.add_argument(
         "-ll",
-        "--logging_level",
+        "--logging-level",
         type=int,
         default=logging.INFO,
-        help="The level of the logging to use.",
+        help="The logging level to use.",
     )
 
     main_subparser = parser.add_subparsers(title="commands", dest="command")

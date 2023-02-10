@@ -172,6 +172,7 @@ class VEnvInterface(EnvManagerInstance):
         envs_directory = Path(root_path) / cls.ID / "envs"
         environments = {}
         first_environment = False
+
         logger.info(f"# {cls.ID} environments")
         envs_directory.mkdir(parents=True, exist_ok=True)
         for env_dir in envs_directory.iterdir():
@@ -180,6 +181,7 @@ class VEnvInterface(EnvManagerInstance):
                     first_environment = True
                 environments[env_dir.name] = str(env_dir)
                 logger.info(f"{env_dir.name} - {str(env_dir)}")
+
         if not first_environment:
             logger.info(f"No environments found for {cls.ID} in {root_path}")
         return environments
