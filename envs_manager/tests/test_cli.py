@@ -24,11 +24,12 @@ SUBCOMMANDS = [
 ]
 
 BACKENDS = [
-    ("venv", [""], "test_env"),
+    ("venv", [""], "test_env", "pip"),
     (
         "conda-like",
         ["Transaction finished", "Executing transaction: ...working... done"],
         "test_env",
+        "python",
     ),
 ]
 
@@ -49,7 +50,7 @@ def test_cli_help(subcommand):
 
 @pytest.mark.parametrize("backend", BACKENDS)
 def test_cli(tmp_path, backend):
-    backend_value, create_result, list_env_result = backend
+    backend_value, create_result, list_env_result, package_list_env_result = backend
     backends_root_path = tmp_path / "backends"
     backends_root_path.mkdir(parents=True)
     os.environ["BACKENDS_ROOT_PATH"] = str(backends_root_path)
@@ -67,6 +68,7 @@ def test_cli(tmp_path, backend):
             for expected_create_result in create_result
         ]
     )
+    assert f"Using ENV_BACKEND: {backend_value}" not in str(create_output)
 
     # Check environment listing
     list_env_output = subprocess.check_output(
@@ -74,10 +76,26 @@ def test_cli(tmp_path, backend):
             [
                 "envs-manager",
                 f"-b={backend_value}",
-                f"-en=test_create",
                 "list-environments",
             ]
         ),
         shell=True,
     )
+    assert f"Using ENV_BACKEND: {backend_value}" not in str(list_env_output)
     assert list_env_result in str(list_env_output)
+
+    # Check environment packages listing with debug logging level
+    list_env_packages = subprocess.check_output(
+        " ".join(
+            [
+                "envs-manager",
+                f"-b={backend_value}",
+                f"-en={list_env_result}",
+                "-ll=10",
+                "list",
+            ]
+        ),
+        shell=True,
+    )
+    assert f"Using ENV_BACKEND: {backend_value}" in str(list_env_packages)
+    assert package_list_env_result in str(list_env_packages)

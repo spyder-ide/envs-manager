@@ -2,12 +2,16 @@
 #
 # SPDX-License-Identifier: MIT
 
+import logging
 import os
 import shutil
 import subprocess
 from pathlib import Path
 
 from envs_manager.api import EnvManagerInstance, run_command, get_package_info
+
+
+logger = logging.getLogger("envs-manager")
 
 
 class VEnvInterface(EnvManagerInstance):
@@ -83,6 +87,7 @@ class VEnvInterface(EnvManagerInstance):
             if export_file_path:
                 with open(export_file_path, "w") as exported_file:
                     exported_file.write(result.stdout)
+            logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -99,6 +104,7 @@ class VEnvInterface(EnvManagerInstance):
                 import_file_path,
             ]
             result = self._run_command(command)
+            logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -113,7 +119,8 @@ class VEnvInterface(EnvManagerInstance):
         try:
             command = [self.executable_path, "-m", "pip", "install"] + packages
             result = self._run_command(command, capture_output=capture_output)
-            print(result.stdout)
+            if capture_output:
+                logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -125,6 +132,8 @@ class VEnvInterface(EnvManagerInstance):
                 command += ["-y"]
             command += packages
             result = self._run_command(command, capture_output=capture_output)
+            if capture_output:
+                logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -134,6 +143,8 @@ class VEnvInterface(EnvManagerInstance):
             command = [self.executable_path, "-m", "pip", "install", "-U"]
             command += packages
             result = self._run_command(command, capture_output=capture_output)
+            if capture_output:
+                logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
             return (False, f"{error.returncode}: {error.stderr}")
@@ -160,23 +171,24 @@ class VEnvInterface(EnvManagerInstance):
             )
             formatted_packages.append(formatted_package)
 
-        print(result.stdout)
+        logger.info(result.stdout)
         return (True, formatted_list)
 
     @classmethod
     def list_environments(cls, root_path, external_executable=None):
         envs_directory = Path(root_path) / cls.ID / "envs"
         environments = {}
-        first_environment = True
-        print(f"# {cls.ID} environments")
+        first_environment = False
+
+        logger.info(f"# {cls.ID} environments")
         envs_directory.mkdir(parents=True, exist_ok=True)
         for env_dir in envs_directory.iterdir():
             if env_dir.is_dir():
-                if first_environment:
-                    first_environment = False
+                if not first_environment:
+                    first_environment = True
                 environments[env_dir.name] = str(env_dir)
-                print(f"{env_dir.name} - {str(env_dir)}")
-        else:
-            if first_environment:
-                print(f"No environments found for {cls.ID} in {root_path}")
+                logger.info(f"{env_dir.name} - {str(env_dir)}")
+
+        if not first_environment:
+            logger.info(f"No environments found for {cls.ID} in {root_path}")
         return environments
