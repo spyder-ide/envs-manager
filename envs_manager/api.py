@@ -88,6 +88,10 @@ class EnvManagerInstance:
         self.executable_variant = None
         assert self.validate(), f"{self.ID} backend unavailable!"
 
+    @property
+    def python_executable_path(self):
+        raise NotImplementedError()
+
     def validate(self):
         pass
 

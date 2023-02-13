@@ -4,6 +4,7 @@
 
 import json
 import logging
+import os
 from pathlib import Path
 import subprocess
 
@@ -20,6 +21,15 @@ logger = logging.getLogger("envs-manager")
 
 class CondaLikeInterface(EnvManagerInstance):
     ID = "conda-like"
+
+    @property
+    def python_executable_path(self):
+        if os.name == "nt":
+            python_executable_path = Path(self.environment_path) / "python.exe"
+        else:
+            python_executable_path = Path(self.environment_path) / "bin" / "python"
+
+        return str(python_executable_path)
 
     def validate(self):
         if self.external_executable:
