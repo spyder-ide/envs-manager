@@ -1,5 +1,24 @@
 # History of changes
 
+## Version 0.1.3 (2023-02-16)
+
+### Issues Closed
+
+* [Issue 27](https://github.com/spyder-ide/envs-manager/issues/27) - Prevent showing `print` statements when running programmatically ([PR 28](https://github.com/spyder-ide/envs-manager/pull/28) by [@dalthviz](https://github.com/dalthviz))
+
+In this release 1 issue was closed.
+
+### Pull Requests Merged
+
+* [PR 29](https://github.com/spyder-ide/envs-manager/pull/29) - PR: Expose env Python executable path for all the backends, by [@dalthviz](https://github.com/dalthviz)
+* [PR 28](https://github.com/spyder-ide/envs-manager/pull/28) - PR: Use `logging` module instead of `print`, by [@dalthviz](https://github.com/dalthviz) ([27](https://github.com/spyder-ide/envs-manager/issues/27))
+
+In this release 2 pull requests were closed.
+
+
+----
+
+
 ## Version 0.1.2 (2023-01-31)
 
 ### Pull Requests Merged
