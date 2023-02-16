@@ -24,13 +24,15 @@ class VEnvInterface(EnvManagerInstance):
         return result
 
     @property
-    def executable_path(self):
+    def python_executable_path(self):
         if os.name == "nt":
-            executable_path = Path(self.environment_path) / "Scripts" / "python.exe"
+            python_executable_path = (
+                Path(self.environment_path) / "Scripts" / "python.exe"
+            )
         else:
-            executable_path = Path(self.environment_path) / "bin" / "python"
+            python_executable_path = Path(self.environment_path) / "bin" / "python"
 
-        return str(executable_path)
+        return str(python_executable_path)
 
     def validate(self):
         try:
@@ -76,7 +78,7 @@ class VEnvInterface(EnvManagerInstance):
     def export_environment(self, export_file_path=None):
         try:
             command = [
-                self.executable_path,
+                self.python_executable_path,
                 "-m",
                 "pip",
                 "list",
@@ -96,7 +98,7 @@ class VEnvInterface(EnvManagerInstance):
         self.create_environment()
         try:
             command = [
-                self.executable_path,
+                self.python_executable_path,
                 "-m",
                 "pip",
                 "install",
@@ -117,7 +119,7 @@ class VEnvInterface(EnvManagerInstance):
         capture_output=False,
     ):
         try:
-            command = [self.executable_path, "-m", "pip", "install"] + packages
+            command = [self.python_executable_path, "-m", "pip", "install"] + packages
             result = self._run_command(command, capture_output=capture_output)
             if capture_output:
                 logger.info(result.stdout)
@@ -127,7 +129,7 @@ class VEnvInterface(EnvManagerInstance):
 
     def uninstall_packages(self, packages, force=False, capture_output=False):
         try:
-            command = [self.executable_path, "-m", "pip", "uninstall"]
+            command = [self.python_executable_path, "-m", "pip", "uninstall"]
             if force:
                 command += ["-y"]
             command += packages
@@ -140,7 +142,7 @@ class VEnvInterface(EnvManagerInstance):
 
     def update_packages(self, packages, force=False, capture_output=False):
         try:
-            command = [self.executable_path, "-m", "pip", "install", "-U"]
+            command = [self.python_executable_path, "-m", "pip", "install", "-U"]
             command += packages
             result = self._run_command(command, capture_output=capture_output)
             if capture_output:
@@ -150,7 +152,7 @@ class VEnvInterface(EnvManagerInstance):
             return (False, f"{error.returncode}: {error.stderr}")
 
     def list_packages(self):
-        command = [self.executable_path, "-m", "pip", "list"]
+        command = [self.python_executable_path, "-m", "pip", "list"]
         result = self._run_command(command)
         result_lines = result.stdout.split("\n")
 

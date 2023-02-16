@@ -5,6 +5,7 @@
 import os
 from pathlib import Path
 import time
+import subprocess
 import sys
 
 import pytest
@@ -16,6 +17,10 @@ TESTS_DIR = Path(__file__).parent.absolute()
 ENV_FILES = TESTS_DIR / "env_files"
 ENV_FILES_CONDA_LIKE = ENV_FILES / "conda-like-files"
 ENV_FILES_VENV = ENV_FILES / "venv-files"
+MANAGER_BACKENDS_SETUP = [
+    ("venv", None, None),
+    ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE"), None),
+]
 BACKENDS = [
     (
         ("venv", None, None),
@@ -181,6 +186,27 @@ def manager_instance(request, tmp_path):
     )
     yield manager_instance
     manager_instance.delete_environment()
+
+
+@pytest.mark.parametrize(
+    "manager_instance",
+    MANAGER_BACKENDS_SETUP,
+    indirect=["manager_instance"],
+)
+def test_manager_backends_python_executable(manager_instance, capsys):
+    # Create an environment with Python in it
+    with capsys.disabled():
+        create_result, _ = manager_instance.create_environment(
+            packages=["python==3.10"], force=True
+        )
+    assert create_result
+
+    # Get Python Zen with the Python executable from the environment
+    python_executable = manager_instance.backend_instance.python_executable_path
+    python_output = subprocess.check_output(
+        " ".join([python_executable, "-c", '"import this"']), shell=True, text=True
+    )
+    assert "Now is better than never." in python_output
 
 
 @pytest.mark.parametrize(
