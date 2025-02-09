@@ -23,8 +23,9 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
 ]
 dependencies = [
+  "packaging",
   "pyyaml",
-  "requests"
+  "requests",
 ]
 dynamic = ["version"]
 

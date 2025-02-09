@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import subprocess
 
+from packaging.version import parse
 import yaml
 
 from envs_manager.api import EnvManagerInstance, run_command, get_package_info
@@ -40,7 +41,11 @@ class CondaLikeInterface(EnvManagerInstance):
                 if len(version) <= 1:
                     self.executable_variant = MICROMAMBA_VARIANT
                 else:
-                    self.executable_variant = version[0]
+                    # This is the minimal conda version we support
+                    if parse(version[1]) > parse("24.1.0"):
+                        self.executable_variant = version[0]
+                    else:
+                        return False
                 return True
             except Exception as error:
                 logger.error(error.stderr)
@@ -144,8 +149,6 @@ class CondaLikeInterface(EnvManagerInstance):
         force=False,
         capture_output=False,
     ):
-        if self.executable_variant != MICROMAMBA_VARIANT:
-            packages = [f"'{package}'" for package in packages]
         command = [
             self.external_executable,
             "install",
