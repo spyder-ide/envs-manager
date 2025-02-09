@@ -112,8 +112,6 @@ class CondaLikeInterface(EnvManagerInstance):
                 self.environment_path,
                 f"--file={import_file_path}",
             ]
-            if force:
-                command += ["-y"]
         else:
             command = [
                 self.external_executable,
@@ -123,8 +121,10 @@ class CondaLikeInterface(EnvManagerInstance):
                 self.environment_path,
                 f"--file={import_file_path}",
             ]
-            if force:
-                command += ["--force"]
+
+        if force:
+            command += ["-y"]
+
         try:
             result = run_command(command, capture_output=True)
             logger.info(result.stdout)
