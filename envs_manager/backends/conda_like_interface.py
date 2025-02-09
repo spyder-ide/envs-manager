@@ -101,6 +101,7 @@ class CondaLikeInterface(EnvManagerInstance):
             logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
+            logger.error(error.stderr)
             return (False, f"{error.returncode}: {error.stderr}")
 
     def import_environment(self, import_file_path, force=False):
@@ -130,6 +131,7 @@ class CondaLikeInterface(EnvManagerInstance):
             logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
+            logger.error(error.stderr)
             return (
                 False,
                 f"{error.returncode}: {error.stderr}\nNote: Importing environments only works for environment definitions created with the same operating system.",
@@ -161,6 +163,7 @@ class CondaLikeInterface(EnvManagerInstance):
                 logger.info(result.stdout)
             return (True, result)
         except subprocess.CalledProcessError as error:
+            logger.error(error.stderr)
             formatted_error = f"{error.returncode}: {error.stderr}"
             return (False, formatted_error)
 
@@ -181,6 +184,7 @@ class CondaLikeInterface(EnvManagerInstance):
         except subprocess.CalledProcessError as error:
             if "PackagesNotFoundError" in error.stderr:
                 return (True, error)
+            logger.error(error.stderr)
             formatted_error = f"{error.returncode}: {error.stderr}"
             return (False, formatted_error)
 
@@ -204,6 +208,7 @@ class CondaLikeInterface(EnvManagerInstance):
             else:
                 return (True, result)
         except subprocess.CalledProcessError as error:
+            logger.error(error.stderr)
             formatted_error = f"{error.returncode}: {error.stderr}"
             return (False, formatted_error)
 
@@ -284,6 +289,6 @@ class CondaLikeInterface(EnvManagerInstance):
 
             return (environments, result)
         except subprocess.CalledProcessError as error:
+            logger.error(error.stderr)
             formatted_error = f"{error.returncode}: {error.stderr}"
-            logger.error(formatted_error)
             return (environments, formatted_error)
