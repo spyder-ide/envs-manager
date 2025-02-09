@@ -39,7 +39,11 @@ class CondaLikeInterface(EnvManagerInstance):
                 result = run_command(command, capture_output=True)
                 version = result.stdout.split()
                 if len(version) <= 1:
-                    self.executable_variant = MICROMAMBA_VARIANT
+                    # We don't support Micromamba 2.0+ because it's not very reliable
+                    if parse(version[0]) < parse("2.0.0"):
+                        self.executable_variant = MICROMAMBA_VARIANT
+                    else:
+                        return False
                 else:
                     # This is the minimal conda version we support
                     if parse(version[1]) > parse("24.1.0"):
