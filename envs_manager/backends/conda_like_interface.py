@@ -11,7 +11,7 @@ import subprocess
 from packaging.version import parse
 import yaml
 
-from envs_manager.api import EnvManagerInstance, run_command, get_package_info
+from envs_manager.backends.api import BackendInstance, run_command, get_package_info
 
 MICROMAMBA_VARIANT = "micromamba"
 CONDA_VARIANT = "conda"
@@ -20,7 +20,7 @@ CONDA_VARIANT = "conda"
 logger = logging.getLogger("envs-manager")
 
 
-class CondaLikeInterface(EnvManagerInstance):
+class CondaLikeInterface(BackendInstance):
     ID = "conda-like"
 
     @property

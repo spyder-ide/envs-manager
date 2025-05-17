@@ -79,7 +79,7 @@ def get_package_info(package_name, channel=None):
     return package_info
 
 
-class EnvManagerInstance:
+class BackendInstance:
     ID = ""
 
     def __init__(self, environment_path, external_executable=None):
