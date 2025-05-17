@@ -8,13 +8,13 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from envs_manager.api import EnvManagerInstance, run_command, get_package_info
+from envs_manager.backends.api import BackendInstance, run_command, get_package_info
 
 
 logger = logging.getLogger("envs-manager")
 
 
-class VEnvInterface(EnvManagerInstance):
+class VEnvInterface(BackendInstance):
     ID = "venv"
 
     def _run_command(self, command, capture_output=True):
