@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import subprocess
+from typing import TypedDict
 
 import requests
 
@@ -77,6 +78,16 @@ def get_package_info(package_name, channel=None):
     elif "message" in package_info:
         package_info = None
     return package_info
+
+
+class BackendActionResult(TypedDict):
+    """Dictionary to report the result of a backend's action."""
+
+    status: bool
+    """True if the action was successful, False otherwise."""
+
+    output: str
+    """Action's output."""
 
 
 class BackendInstance:

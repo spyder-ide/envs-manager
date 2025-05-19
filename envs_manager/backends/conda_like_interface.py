@@ -11,7 +11,12 @@ import subprocess
 from packaging.version import parse
 import yaml
 
-from envs_manager.backends.api import BackendInstance, run_command, get_package_info
+from envs_manager.backends.api import (
+    BackendActionResult,
+    BackendInstance,
+    get_package_info,
+    run_command,
+)
 
 MICROMAMBA_VARIANT = "micromamba"
 CONDA_VARIANT = "conda"
@@ -64,12 +69,15 @@ class CondaLikeInterface(BackendInstance):
                 command += ["-c"] + [channel]
         if force:
             command += ["-y"]
+
         try:
             result = run_command(command, capture_output=True)
             logger.info(result.stdout)
-            return (True, result)
+            return BackendActionResult(status=True, output=result.stdout)
+        except subprocess.CalledProcessError as error:
+            return BackendActionResult(status=False, output=error.stderr)
         except Exception as error:
-            return (False, f"{error.returncode}: {error.stderr}")
+            return BackendActionResult(status=False, output=str(error))
 
     def delete_environment(self, force=False):
         command = [
@@ -81,12 +89,15 @@ class CondaLikeInterface(BackendInstance):
         ]
         if force:
             command += ["-y"]
+
         try:
             result = run_command(command, capture_output=True)
             logger.info(result.stdout)
-            return (True, result)
+            return BackendActionResult(status=True, output=result.stdout)
+        except subprocess.CalledProcessError as error:
+            return BackendActionResult(status=False, output=error.stderr)
         except Exception as error:
-            return (False, f"{error.returncode}: {error.stderr}")
+            return BackendActionResult(status=False, output=str(error))
 
     def activate_environment(self):
         raise NotImplementedError()
@@ -109,10 +120,12 @@ class CondaLikeInterface(BackendInstance):
                 with open(export_file_path, "w") as exported_file:
                     exported_file.write(result.stdout)
             logger.info(result.stdout)
-            return (True, result)
+            return BackendActionResult(status=True, output=result.stdout)
         except subprocess.CalledProcessError as error:
             logger.error(error.stderr)
-            return (False, f"{error.returncode}: {error.stderr}")
+            return BackendActionResult(status=False, output=error.stderr)
+        except Exception as error:
+            return BackendActionResult(status=False, output=str(error))
 
     def import_environment(self, import_file_path, force=False):
         if self.executable_variant == MICROMAMBA_VARIANT:
@@ -139,13 +152,18 @@ class CondaLikeInterface(BackendInstance):
         try:
             result = run_command(command, capture_output=True)
             logger.info(result.stdout)
-            return (True, result)
+            return BackendActionResult(status=True, output=result.stdout)
         except subprocess.CalledProcessError as error:
             logger.error(error.stderr)
-            return (
-                False,
-                f"{error.returncode}: {error.stderr}\nNote: Importing environments only works for environment definitions created with the same operating system.",
+            return BackendActionResult(
+                status=False,
+                output=(
+                    f"{error.stderr}\nNote: Importing environments only works for "
+                    f"environment files created with the same operating system."
+                ),
             )
+        except Exception as error:
+            return BackendActionResult(status=False, output=str(error))
 
     def install_packages(
         self,
@@ -168,12 +186,15 @@ class CondaLikeInterface(BackendInstance):
         try:
             result = run_command(command, capture_output=capture_output)
             if capture_output:
-                logger.info(result.stdout)
-            return (True, result)
+                logger.info(result.stdout or result.stderr)
+            return BackendActionResult(
+                status=True, output=result.stdout or result.stderr
+            )
         except subprocess.CalledProcessError as error:
             logger.error(error.stderr)
-            formatted_error = f"{error.returncode}: {error.stderr}"
-            return (False, formatted_error)
+            return BackendActionResult(status=False, output=error.stderr)
+        except Exception as error:
+            return BackendActionResult(status=False, output=str(error))
 
     def uninstall_packages(self, packages, force=False, capture_output=False):
         command = [
@@ -187,14 +208,17 @@ class CondaLikeInterface(BackendInstance):
         try:
             result = run_command(command, capture_output=capture_output)
             if capture_output:
-                logger.info(result.stdout)
-            return (True, result)
+                logger.info(result.stdout or result.stderr)
+            return BackendActionResult(
+                status=True, output=result.stdout or result.stderr
+            )
         except subprocess.CalledProcessError as error:
             if "PackagesNotFoundError" in error.stderr:
-                return (True, error)
+                return BackendActionResult(status=True, output=error.stderr)
             logger.error(error.stderr)
-            formatted_error = f"{error.returncode}: {error.stderr}"
-            return (False, formatted_error)
+            return BackendActionResult(status=False, output=error.stderr)
+        except Exception as error:
+            return BackendActionResult(status=False, output=str(error))
 
     def update_packages(self, packages, force=False, capture_output=False):
         command = [
@@ -210,24 +234,26 @@ class CondaLikeInterface(BackendInstance):
             if capture_output:
                 logger.info(result.stdout)
                 if "All requested packages already installed" in result.stdout:
-                    return (False, result.stdout)
+                    return BackendActionResult(status=False, output=result.stdout)
                 else:
-                    return (True, result.stdout)
+                    return BackendActionResult(status=True, output=result.stdout)
             else:
-                return (True, result)
+                return BackendActionResult(status=True, output=result.stdout)
         except subprocess.CalledProcessError as error:
             logger.error(error.stderr)
-            formatted_error = f"{error.returncode}: {error.stderr}"
-            return (False, formatted_error)
+            return BackendActionResult(status=False, output=error.stderr)
+        except Exception as error:
+            return BackendActionResult(status=False, output=str(error))
 
     def list_packages(self):
         command = [self.external_executable, "list", "-p", self.environment_path]
         result = run_command(command, capture_output=True)
         result_lines = result.stdout.split("\n")
-        export_env_result, export_env_data = self.export_environment()
-        if export_env_result:
+
+        export_env_result = self.export_environment()
+        if export_env_result["status"]:
             packages_requested = yaml.load(
-                export_env_data.stdout, Loader=yaml.FullLoader
+                export_env_result["output"], Loader=yaml.FullLoader
             )["dependencies"]
             packages_requested = [
                 package.split("[")[0].split("=")[0] for package in packages_requested
@@ -239,11 +265,11 @@ class CondaLikeInterface(BackendInstance):
             skip_lines = 4
         else:
             skip_lines = 3
+
         formatted_packages = []
         formatted_list = dict(
             environment=self.environment_path, packages=formatted_packages
         )
-
         for package in result_lines[skip_lines:-1]:
             package_info = package.split()
             package_name = package_info[0]
@@ -265,7 +291,7 @@ class CondaLikeInterface(BackendInstance):
             formatted_packages.append(formatted_package)
 
         logger.info(result.stdout)
-        return (True, formatted_list)
+        return BackendActionResult(status=True, output=formatted_list)
 
     @classmethod
     def list_environments(cls, root_path, external_executable=None):
@@ -295,8 +321,9 @@ class CondaLikeInterface(BackendInstance):
             if not first_environment:
                 logger.info(f"No environments found for {cls.ID} in {envs_directory}")
 
-            return (environments, result)
+            return BackendActionResult(status=True, output=environments)
         except subprocess.CalledProcessError as error:
             logger.error(error.stderr)
-            formatted_error = f"{error.returncode}: {error.stderr}"
-            return (environments, formatted_error)
+            return BackendActionResult(status=False, output=error.stderr)
+        except Exception as error:
+            return BackendActionResult(status=False, output=str(error))
