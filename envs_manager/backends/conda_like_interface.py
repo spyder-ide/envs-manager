@@ -60,10 +60,14 @@ class CondaLikeInterface(BackendInstance):
                 logger.error(error.stderr)
         return False
 
-    def create_environment(self, packages=[], channels=["conda-forge"], force=False):
+    def create_environment(self, packages=None, channels=None, force=False):
         command = [self.external_executable, "create", "-p", self.environment_path]
+
+        packages = [] if packages is None else packages
         if packages:
             command += packages
+
+        channels = ["conda-forge"] if channels is None else channels
         if channels:
             for channel in channels:
                 command += ["-c"] + [channel]
@@ -168,7 +172,7 @@ class CondaLikeInterface(BackendInstance):
     def install_packages(
         self,
         packages,
-        channels=["conda-forge"],
+        channels=None,
         force=False,
         capture_output=False,
     ):
@@ -178,11 +182,15 @@ class CondaLikeInterface(BackendInstance):
             "-p",
             self.environment_path,
         ] + packages
+
         if force:
             command += ["-y"]
+
+        channels = ["conda-forge"] if channels is None else channels
         if channels:
             for channel in channels:
                 command += ["-c"] + [channel]
+
         try:
             result = run_command(command, capture_output=capture_output)
             if capture_output:
