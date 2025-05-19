@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+from __future__ import annotations
 import subprocess
 from typing import TypedDict
 
@@ -100,48 +101,63 @@ class BackendInstance:
         assert self.validate(), f"{self.ID} backend unavailable!"
 
     @property
-    def python_executable_path(self):
-        raise NotImplementedError()
+    def python_executable_path(self) -> str:
+        raise NotImplementedError
 
-    def validate(self):
+    def validate(self) -> bool:
         pass
 
-    def create_environment(self, packages=None, channels=None, force=False):
-        raise NotImplementedError()
+    def create_environment(
+        self,
+        packages: list[str] | None = None,
+        channels: list[str] | None = None,
+        force: bool = False,
+    ) -> BackendActionResult:
+        raise NotImplementedError
 
-    def delete_environment(self, force=False):
-        raise NotImplementedError()
+    def delete_environment(self, force: bool = False) -> BackendActionResult:
+        raise NotImplementedError
 
     def activate_environment(self):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def deactivate_environment(self):
-        raise NotImplementedError()
+        raise NotImplementedError
 
-    def export_environment(self, export_file_path=None):
-        raise NotImplementedError()
+    def export_environment(
+        self, export_file_path: str | None = None
+    ) -> BackendActionResult:
+        raise NotImplementedError
 
-    def import_environment(self, import_file_path, force=False):
-        raise NotImplementedError()
+    def import_environment(
+        self, import_file_path: str, force: bool = False
+    ) -> BackendActionResult:
+        raise NotImplementedError
 
     def install_packages(
         self,
-        packages,
-        channels=None,
-        force=False,
-        capture_output=False,
-    ):
-        raise NotImplementedError()
+        packages: list[str],
+        channels: list[str] | None = None,
+        force: bool = False,
+        capture_output: bool = False,
+    ) -> BackendActionResult:
+        raise NotImplementedError
 
-    def uninstall_packages(self, packages, force=False, capture_output=False):
-        raise NotImplementedError()
+    def uninstall_packages(
+        self, packages: list[str], force: bool = False, capture_output: bool = False
+    ) -> BackendActionResult:
+        raise NotImplementedError
 
-    def update_packages(self, packages, force=False, capture_output=False):
-        raise NotImplementedError()
+    def update_packages(
+        self, packages: list[str], force: bool = False, capture_output: bool = False
+    ) -> BackendActionResult:
+        raise NotImplementedError
 
-    def list_packages(self):
-        raise NotImplementedError()
+    def list_packages(self) -> BackendActionResult:
+        raise NotImplementedError
 
     @classmethod
-    def list_environments(cls, root_path, external_executable=None):
-        raise NotImplementedError()
+    def list_environments(
+        cls, root_path: str, external_executable: str | None = None
+    ) -> BackendActionResult:
+        raise NotImplementedError
