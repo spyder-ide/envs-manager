@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+from __future__ import annotations
 import os
 from pathlib import Path
 
@@ -17,6 +18,22 @@ DEFAULT_BACKENDS_ROOT_PATH = Path(
 DEFAULT_BACKEND = os.environ.get("ENV_BACKEND", "venv")
 DEFAULT_ENVS_ROOT_PATH = DEFAULT_BACKENDS_ROOT_PATH / DEFAULT_BACKEND / "envs"
 EXTERNAL_EXECUTABLE = os.environ.get("ENV_BACKEND_EXECUTABLE", None)
+
+
+class ManagerActions:
+    """Enum with the possible actions that can be performed by the manager."""
+
+    CreateEnvironment = "create_environment"
+    DeleteEnvironment = "delete_environment"
+    ActivateEnvironment = "activate"
+    DeactivateEnvironment = "deactivate"
+    ExportEnvironment = "export_environment"
+    ImportEnvironment = "import_environment"
+    InstallPackages = "install"
+    UninstallPackages = "uninstall"
+    UpdatePackages = "update"
+    ListPackages = "list"
+    ListEnvironments = "list_environments"
 
 
 class Manager:
@@ -53,6 +70,15 @@ class Manager:
         self.backend_instance = self.backend_class(
             str(self.env_directory), external_executable=str(external_executable)
         )
+
+    def run_action(
+        self, action: ManagerActions, action_options: dict | None = None
+    ):
+        method = getattr(self, action)
+        if action_options is not None:
+            return method(**action_options)
+        else:
+            return method()
 
     def create_environment(self, packages=None, channels=None, force=False):
         if channels:
