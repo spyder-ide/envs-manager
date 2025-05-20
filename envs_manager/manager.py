@@ -5,6 +5,7 @@
 from __future__ import annotations
 import os
 from pathlib import Path
+from typing import TypedDict
 
 from envs_manager.backends.api import ManagerActionResult
 from envs_manager.backends.venv_interface import VEnvInterface
@@ -35,6 +36,28 @@ class ManagerActions:
     UpdatePackages = "update"
     ListPackages = "list"
     ListEnvironments = "list_environments"
+
+
+class ManagerOptions(TypedDict):
+    """Options to create an instance of the manager class."""
+
+    backend: str
+    """Backend the manager will use."""
+
+    root_path: str | None
+    """
+    Root path where the manager actions will be performed (e.g. where environments
+    will be created).
+    """
+
+    env_name: str | None
+    """Name of the environment to which the action will be performed."""
+
+    env_directory: str | None
+    """Path to the environment's directory."""
+
+    external_executable: str | None
+    """Path to the external executable that will be used by the manager."""
 
 
 class Manager:
