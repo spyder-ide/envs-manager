@@ -81,7 +81,12 @@ class Manager:
         else:
             return method()
 
-    def create_environment(self, packages=None, channels=None, force=False):
+    def create_environment(
+        self,
+        packages: list[str] | None = None,
+        channels: list[str] | None = None,
+        force: bool = False,
+    ) -> ManagerActionResult:
         if channels:
             return self.backend_instance.create_environment(
                 packages, channels=channels, force=force
@@ -89,7 +94,7 @@ class Manager:
         else:
             return self.backend_instance.create_environment(packages, force=force)
 
-    def delete_environment(self, force=False):
+    def delete_environment(self, force: bool = False) -> ManagerActionResult:
         return self.backend_instance.delete_environment(force=force)
 
     def activate(self):
@@ -98,15 +103,25 @@ class Manager:
     def deactivate(self):
         self.backend_instance.deactivate_environment()
 
-    def export_environment(self, export_file_path=None):
+    def export_environment(
+        self, export_file_path: str | None = None
+    ) -> ManagerActionResult:
         return self.backend_instance.export_environment(
             export_file_path=export_file_path
         )
 
-    def import_environment(self, import_file_path, force=False):
+    def import_environment(
+        self, import_file_path: str, force: bool = False
+    ) -> ManagerActionResult:
         return self.backend_instance.import_environment(import_file_path, force=force)
 
-    def install(self, packages=None, channels=None, force=False, capture_output=False):
+    def install(
+        self,
+        packages: list[str] | None = None,
+        channels: list[str] | None = None,
+        force: bool = False,
+        capture_output: bool = False,
+    ) -> ManagerActionResult:
         if channels:
             return self.backend_instance.install_packages(
                 packages=packages,
@@ -119,26 +134,30 @@ class Manager:
                 packages, force=force, capture_output=capture_output
             )
 
-    def uninstall(self, packages, force=False, capture_output=False):
+    def uninstall(
+        self, packages: list[str], force: bool = False, capture_output: bool = False
+    ) -> ManagerActionResult:
         return self.backend_instance.uninstall_packages(
             packages, force=force, capture_output=capture_output
         )
 
-    def update(self, packages, force=False, capture_output=False):
+    def update(
+        self, packages: list[str], force: bool = False, capture_output: bool = False
+    ) -> ManagerActionResult:
         return self.backend_instance.update_packages(
             packages, force=force, capture_output=capture_output
         )
 
-    def list(self):
+    def list(self) -> ManagerActionResult:
         return self.backend_instance.list_packages()
 
     @classmethod
     def list_environments(
         cls,
-        backend=DEFAULT_BACKEND,
-        root_path=DEFAULT_BACKENDS_ROOT_PATH,
-        external_executable=None,
-    ):
+        backend: str = DEFAULT_BACKEND,
+        root_path: str = str(DEFAULT_BACKENDS_ROOT_PATH),
+        external_executable: str | None = None,
+    ) -> ManagerActionResult:
         return cls.BACKENDS[backend].list_environments(
             root_path, external_executable=external_executable
         )
