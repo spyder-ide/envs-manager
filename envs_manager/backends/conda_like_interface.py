@@ -6,6 +6,7 @@ import json
 import logging
 import os
 from pathlib import Path
+import shutil
 import subprocess
 
 from packaging.version import parse
@@ -38,6 +39,16 @@ class CondaLikeInterface(BackendInstance):
         return str(python_executable_path)
 
     def validate(self):
+        if self.external_executable is None:
+            if os.name == "nt":
+                cmd_list = ["conda.exe", "conda.bat", "mamba.exe", "micromamba.exe"]
+            else:
+                cmd_list = ["conda", "mamba", "micromamba"]
+
+            for cmd in cmd_list:
+                if shutil.which(cmd):
+                    self.external_executable = shutil.which(cmd)
+
         if self.external_executable:
             command = [self.external_executable, "--version"]
             try:
