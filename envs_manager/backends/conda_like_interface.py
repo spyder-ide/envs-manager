@@ -301,15 +301,14 @@ class CondaLikeInterface(BackendInstance):
         logger.info(result.stdout)
         return BackendActionResult(status=True, output=formatted_list)
 
-    @classmethod
-    def list_environments(cls, root_path, external_executable=None):
-        if not external_executable:
-            raise Exception(f"Missing path to external executable for {cls.ID} backend")
-        envs_directory = Path(root_path) / cls.ID / "envs"
+    def list_environments(self):
         environments = {}
         first_environment = False
+        command = [self.external_executable, "env", "list", "--json"]
+
+        envs_directory = Path(self.envs_directory)
         envs_directory.mkdir(parents=True, exist_ok=True)
-        command = [external_executable, "env", "list", "--json"]
+
         try:
             result = run_command(command, capture_output=True)
             logger.debug(result.stdout)
@@ -317,7 +316,7 @@ class CondaLikeInterface(BackendInstance):
             result_json = json.loads(result.stdout)
             logger.debug(result_json)
 
-            logger.info(f"# {cls.ID} environments")
+            logger.info(f"# {self.ID} environments")
             for env_dir in result_json["envs"]:
                 env_dir_path = Path(env_dir)
                 if envs_directory in env_dir_path.parents:
@@ -327,7 +326,9 @@ class CondaLikeInterface(BackendInstance):
                     logger.info(f"{env_dir_path.name} - {str(env_dir_path)}")
 
             if not first_environment:
-                logger.info(f"No environments found for {cls.ID} in {envs_directory}")
+                logger.info(
+                    f"No environments found for {self.ID} in {self.envs_directory}"
+                )
 
             return BackendActionResult(status=True, output=environments)
         except subprocess.CalledProcessError as error:
