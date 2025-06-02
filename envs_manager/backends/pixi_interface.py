@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+import json
 import logging
 import os
 from pathlib import Path
@@ -9,6 +10,7 @@ import shutil
 import subprocess
 
 from packaging.version import parse
+from rattler import AboutJson
 
 from envs_manager.backends.api import BackendInstance, BackendActionResult, run_command
 
@@ -46,7 +48,7 @@ class PixiInterface(BackendInstance):
             try:
                 result = run_command(command, capture_output=True)
                 version = result.stdout.split()[1]
-                if parse(version) >= parse("0.40.3"):
+                if parse(version) >= parse("0.47.0"):
                     return True
             except subprocess.CalledProcessError as error:
                 logger.error(error.stderr.strip())
@@ -204,3 +206,83 @@ class PixiInterface(BackendInstance):
         except Exception as error:
             logger.error(error, exc_info=True)
             return BackendActionResult(status=False, output=str(error))
+
+    def list_packages(self):
+        # All packages
+        command = [self.external_executable, "list"]
+        result = run_command(command, capture_output=True, cwd=self.environment_path)
+        result_lines = result.stdout.split("\n")
+
+        # Requsted packages
+        requested_command = [self.external_executable, "list", "--explicit"]
+        result_requested = run_command(
+            requested_command, capture_output=True, cwd=self.environment_path
+        )
+        packages_requested = result_requested.stdout.split("\n")[1:-1]
+        packages_requested = [package.split()[0] for package in packages_requested]
+
+        formatted_packages = []
+        formatted_list = dict(
+            environment=self.environment_path, packages=formatted_packages
+        )
+
+        for package in result_lines[1:-1]:
+            package_info = package.split()
+            package_name = package_info[0]
+            package_version = package_info[1]
+            package_build = package_info[2]
+            package_channel = package_info[5]
+            package_requested = package_name in packages_requested
+
+            package_dir = package_name + "-" + package_version + "-" + package_build
+            package_full_info = self._get_package_info(package_dir)
+            package_description = package_full_info.description
+
+            # Only take the first sentence and replace eols by spaces
+            if package_description:
+                package_description = package_description.split(".")[0].replace(
+                    "\n", " "
+                )
+
+            formatted_package = dict(
+                name=package_name,
+                version=package_version,
+                build=package_build,
+                channel=package_channel,
+                description=package_description,
+                requested=package_requested,
+            )
+            formatted_packages.append(formatted_package)
+
+        logger.info(result.stdout.strip())
+        return BackendActionResult(status=True, output=formatted_list)
+
+    def _get_package_info(self, package_dir):
+        """
+        Get package information from the Pixi packages cache.
+
+        Parameters
+        ----------
+        package_dir : str
+            Package directory name in the Pixi packages cache.
+
+        Returns
+        -------
+        package_info : AboutJson
+            Py-rattler object with metadata about the package.
+        """
+        info = None
+
+        try:
+            command = [self.external_executable, "info", "--json"]
+            result = run_command(command, capture_output=True)
+            cache_dir = json.loads(result.stdout).get("cache_dir")
+        except subprocess.CalledProcessError as error:
+            logger.error(error, exc_info=True)
+            return
+
+        if cache_dir:
+            absolute_package_dir = Path(cache_dir) / "pkgs" / package_dir
+            info = AboutJson.from_package_directory(str(absolute_package_dir))
+
+        return info
