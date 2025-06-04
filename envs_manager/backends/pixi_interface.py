@@ -266,6 +266,16 @@ class PixiInterface(BackendInstance):
         logger.info(result.stdout.strip())
         return BackendActionResult(status=True, output=formatted_list)
 
+    def list_environments(self):
+        environments = {}
+
+        logger.info(f"# {self.ID} environments")
+        for env_dir_path in Path(self.envs_directory).iterdir():
+            environments[env_dir_path.name] = str(env_dir_path)
+            logger.info(f"{env_dir_path.name} - {str(env_dir_path)}")
+
+        return BackendActionResult(status=True, output=environments)
+
     def _get_package_info(self, package_dir):
         """
         Get package information from the Pixi packages cache.
