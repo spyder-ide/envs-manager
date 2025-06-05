@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import zipfile
 
 from packaging.version import parse
 from rattler import AboutJson
@@ -132,6 +133,109 @@ class PixiInterface(BackendInstance):
             result = run_command(command, capture_output=True)
             logger.info(f"Deleting environment located at {self.environment_path}")
             return BackendActionResult(status=True, output=result.stdout)
+        except subprocess.CalledProcessError as error:
+            error_text = error.stderr.strip()
+            logger.error(error_text)
+            return BackendActionResult(status=False, output=error_text)
+        except Exception as error:
+            logger.error(error, exc_info=True)
+            return BackendActionResult(status=False, output=str(error))
+
+    def export_environment(self, export_file_path=None):
+        env_path = Path(self.environment_path)
+
+        try:
+            # Use a temp zip file if necessary
+            remove_zip_file = False
+            if export_file_path is None:
+                export_file_path = str(env_path / f"export_{env_path.name}.zip")
+                remove_zip_file = True
+
+            # Group pixi files into a single zip one
+            with zipfile.ZipFile(export_file_path, "w", zipfile.ZIP_DEFLATED) as zf:
+                zf.write(str(env_path / "pixi.toml"), arcname="pixi.toml")
+                zf.write(str(env_path / "pixi.lock"), arcname="pixi.lock")
+
+            # Read zip file contents to send them to the frontend
+            with open(export_file_path, "rb") as file:
+                zip_content = file.read()
+
+            # Remove temp zip file
+            if remove_zip_file:
+                try:
+                    Path(export_file_path).unlink()
+                except Exception:
+                    pass
+            else:
+                logger.info(f"Environment exported to {export_file_path}")
+
+            return BackendActionResult(status=True, output=zip_content)
+        except Exception as error:
+            logger.error(error, exc_info=True)
+            return BackendActionResult(status=False, output=str(error))
+
+    def import_environment(self, import_file_path, force=False):
+        # Create directory where the environment will be installed
+        env_path = Path(self.environment_path)
+        if env_path.is_dir():
+            msg = "An environment with the selected name already exists"
+            logger.info(msg)
+            return BackendActionResult(status=False, output=msg)
+        else:
+            env_path.mkdir(parents=True)
+
+        # Validations for the zip file
+        remove_import_file = False
+        if isinstance(import_file_path, bytes):
+            # Create temp zip file if we receive bytes, which can be sent from the
+            # frontend as the contents of the file itself
+            remove_import_file = True
+            import_file_contents = import_file_path
+            import_file_path = str(Path(self.envs_directory) / (env_path.name + ".zip"))
+            with open(import_file_path, "wb") as file:
+                file.write(import_file_contents)
+        else:
+            # Check the import file exists
+            if not Path(import_file_path).is_file():
+                msg = "The import file you passed doesn't exist"
+                logger.info(msg)
+                return BackendActionResult(status=False, output=msg)
+
+        # Uncompress zip file
+        try:
+            with zipfile.ZipFile(import_file_path, "r") as zf:
+                zf.extractall(path=str(env_path))
+        except Exception as error:
+            logger.error(error, exc_info=True)
+
+            if remove_import_file:
+                try:
+                    os.remove(str(import_file_path))
+                except Exception:
+                    pass
+
+            msg = (
+                f"There was an error uncompressing the import file. The error is: "
+                f"{error}"
+            )
+            return BackendActionResult(status=False, output=msg)
+
+        # Remove temp file if necessary
+        if remove_import_file:
+            try:
+                Path(import_file_path).unlink()
+            except Exception:
+                pass
+
+        # Create the environment
+        command = [self.external_executable, "install"]
+        try:
+            result = run_command(
+                command, capture_output=True, cwd=self.environment_path
+            )
+            output = (result.stdout or result.stderr).strip()
+            logger.info(output)
+            return BackendActionResult(status=True, output=output)
         except subprocess.CalledProcessError as error:
             error_text = error.stderr.strip()
             logger.error(error_text)
