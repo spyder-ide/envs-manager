@@ -19,11 +19,63 @@ TESTS_DIR = Path(__file__).parent.absolute()
 ENV_FILES = TESTS_DIR / "env_files"
 ENV_FILES_CONDA_LIKE = ENV_FILES / "conda-like-files"
 ENV_FILES_VENV = ENV_FILES / "venv-files"
+PIXI_EXECUTABLE = Path(os.environ.get("HOME")) / ".pixi" / "bin" / "pixi"
+
 MANAGER_BACKENDS_SETUP = [
-    ("venv", None, None),
+    ("pixi", PIXI_EXECUTABLE, None),
     ("conda-like", os.environ.get("ENV_BACKEND_EXECUTABLE"), None),
+    ("venv", None, None),
 ]
+
 BACKENDS = [
+    (
+        ("pixi", PIXI_EXECUTABLE, None),
+        "python",
+        ["packaging=21.0"],
+        ["packaging"],
+        ["foo"],
+        (
+            [
+                "Cannot solve the request because of: No candidates were found for foo *."
+            ],
+            ["could not find a package named 'foo'"],
+            ["Dependency `foo` doesn't exist", "Removed foo"],
+        ),
+        # Key returned by list call, Number of packages returned, Number of properties returned per package, Package description
+        [
+            2,
+            1,
+            6,
+            (
+                "Python is a widely used high-level, general-purpose, interpreted, "
+                "dynamic programming language"
+            ),
+        ],
+    ),
+    (
+        ("pixi", PIXI_EXECUTABLE, "test_env"),
+        "python",
+        ["packaging=21.0"],
+        ["packaging"],
+        ["foo"],
+        (
+            [
+                "Cannot solve the request because of: No candidates were found for foo *."
+            ],
+            ["could not find a package named 'foo'"],
+            ["Dependency `foo` doesn't exist", "Removed foo"],
+        ),
+        # Key returned by list call, Number of packages returned, Number of properties returned per package, Package description
+        [
+            2,
+            1,
+            6,
+            (
+                "Python is a widely used high-level, general-purpose, interpreted, "
+                "dynamic programming language"
+            ),
+        ],
+    ),
     (
         ("venv", None, None),
         "pip",
@@ -173,10 +225,6 @@ def manager_instance(request, tmp_path):
         root_path = None
         envs_directory = tmp_path / "envs"
         env_directory = envs_directory / f"test_{backend}"
-        if backend == "conda-like":
-            envs_directory.mkdir(parents=True)
-        else:
-            env_directory.mkdir(parents=True)
     else:
         # Pass root_path and env_name letting manager create env directory path
         root_path = tmp_path
@@ -210,6 +258,7 @@ def test_manager_backends_python_executable(manager_instance, capsys):
         create_result = manager_instance.create_environment(
             packages=["python==3.10"], force=True
         )
+    print(create_result["output"])
     assert create_result["status"]
 
     # Get Python Zen with the Python executable from the environment
@@ -303,6 +352,7 @@ def test_manager_backends(
         update_warning_messages,
         uninstall_warning_messages,
     ) = messages
+
     # Try to install unexisting package
     with capsys.disabled():
         install_error_result = manager_instance.install(
