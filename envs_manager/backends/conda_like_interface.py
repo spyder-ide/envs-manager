@@ -6,10 +6,13 @@ import json
 import logging
 import os
 from pathlib import Path
+import platform
 import shutil
 import subprocess
+import sys
 
 from packaging.version import parse
+import requests
 import yaml
 
 from envs_manager.backends.api import (
@@ -39,15 +42,13 @@ class CondaLikeInterface(BackendInstance):
         return str(python_executable_path)
 
     def validate(self):
-        if self.external_executable is None:
-            if os.name == "nt":
-                cmd_list = ["conda.exe", "conda.bat", "mamba.exe", "micromamba.exe"]
-            else:
-                cmd_list = ["conda", "mamba", "micromamba"]
+        self.external_executable = self.find_backend_executable(exec_name="micromamba")
 
-            for cmd in cmd_list:
-                if shutil.which(cmd):
-                    self.external_executable = shutil.which(cmd)
+        if self.external_executable is None:
+            self.install_backend_executable()
+            self.external_executable = self.find_backend_executable(
+                exec_name="micromamba"
+            )
 
         if self.external_executable:
             command = [self.external_executable, "--version"]
@@ -69,7 +70,73 @@ class CondaLikeInterface(BackendInstance):
                 return True
             except Exception as error:
                 logger.error(error.stderr)
+
         return False
+
+    def install_backend_executable(self):
+        # OS route for the Micromamba URL
+        machine = platform.machine()
+        if os.name == "nt":
+            os_route = "win-64"
+        elif sys.platform == "darwin":
+            if machine == "arm64" or machine == "aarch64":
+                os_route = "osx-arm64"
+            else:
+                os_route = "osx-64"
+        else:
+            if machine == "x86_64":
+                os_route = "linux-64"
+            elif machine == "aarch64":
+                os_route = "linux-aarch64"
+            else:
+                os_route = "linux-ppc64le"
+
+        # Download compressed Micromamba file
+        compressed_file = "micromamba.tar.bz2"
+        path_to_compressed_file = Path(self.bin_directory) / compressed_file
+
+        req = requests.get(f"https://micro.mamba.pm/api/micromamba/{os_route}/1.5.10")
+        with open(str(path_to_compressed_file), "wb") as f:
+            f.write(req.content)
+
+        # Extract micromamba from compressed file
+        micromamba_path_in_tar = (
+            "Library/bin/micromamba.exe" if os.name == "nt" else "bin/micromamba"
+        )
+        try:
+            run_command(
+                [
+                    "tar",
+                    "-xf",
+                    compressed_file,
+                    micromamba_path_in_tar,
+                ],
+                cwd=Path(self.bin_directory),
+            )
+        except subprocess.CalledProcessError as error:
+            logger.error(error.stderr.strip())
+            return
+        except Exception as error:
+            logger.error(error, exc_info=True)
+            return
+
+        # Move micromamba to the locaiton we want
+        exec_extension = ".exe" if os.name == "nt" else ""
+        end_path = (
+            Path(self.bin_directory) / "Library" / "bin" / "micromamba.exe"
+            if os.name == "nt"
+            else Path(self.bin_directory) / "bin" / "micromamba"
+        )
+        shutil.move(end_path, Path(self.bin_directory) / f"micromamba{exec_extension}")
+
+        # Clean up
+        try:
+            os.remove(path_to_compressed_file)
+            os.rmdir(end_path.parent)
+            if os.name == "nt":
+                os.rmdir(end_path.parents[1])
+        except Exception:
+            pass
 
     def create_environment(self, packages=None, channels=None, force=False):
         command = [self.external_executable, "create", "-p", self.environment_path]

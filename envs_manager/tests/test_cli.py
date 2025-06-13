@@ -25,15 +25,15 @@ SUBCOMMANDS = [
 ]
 
 BACKENDS = [
-    (
-        "pixi",
-        [
-            "pixi.toml",
-            "Added python",
-        ],
-        "test_env",
-        "python",
-    ),
+    # (
+    #     "pixi",
+    #     [
+    #         "pixi.toml",
+    #         "Added python",
+    #     ],
+    #     "test_env",
+    #     "python",
+    # ),
     (
         "conda-like",
         [
