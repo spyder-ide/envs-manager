@@ -33,6 +33,9 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install -e .
+      - name: Setup Remote SSH Connection
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 120
       - name: Run tests
         shell: bash -l {0}
         run: |
