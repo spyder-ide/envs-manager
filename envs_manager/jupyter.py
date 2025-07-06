@@ -42,14 +42,18 @@ class EnvManagerHandler(JupyterHandler):
 
     @authorized
     @web.authenticated
-    def post(self, action: ManagerActions):
-        manager = self.get_manager()
-        action_options = self.get_options()
-        self.write_json(
-            manager.run_action(action, action_options),
-            status=200,
-        )
-
+    def post(self, action: str):
+        try:
+            manager = self.get_manager()
+            action_options = self.get_options()
+            self.write_json(
+                manager.run_action(ManagerActions(action), action_options),
+                status=200,
+            )
+        except Exception as e:
+            self.set_status(501)
+            self.finish(str(e))
+            self.log_exception(type(e), e, e.__traceback__)
 
 class EnvManagerApp(ExtensionApp):
     """Jupyter extension for managing environments."""
