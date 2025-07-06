@@ -26,8 +26,8 @@ class EnvManagerHandler(JupyterHandler):
     def get_manager(self) -> Manager:
         """Get the environment manager instance."""
         return Manager(
-            backend=self.get_argument("backend", None) or self.settings["default_backend"],
-            root_path=self.settings["root_path"],
+            backend=self.get_argument("backend", None) or self.settings["envs_manager_config"]["default_backend"],
+            root_path=self.settings["envs_manager_config"]["root_path"],
             env_name=self.get_argument("env_name", None),
             env_directory=self.get_argument("env_directory", None),
         )
