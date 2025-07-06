@@ -19,7 +19,7 @@ from envs_manager.manager import (
 class EnvManagerHandler(JupyterHandler):
     """Handler to list available environments."""
 
-    _handler_action_regex = rf"(?P<action>{'|'.join(t.get_args(ManagerActions))})"
+    _handler_action_regex = rf"(?P<action>{'|'.join(action.value for action in ManagerActions)})"
 
     auth_resource = "envs_manager"
 
